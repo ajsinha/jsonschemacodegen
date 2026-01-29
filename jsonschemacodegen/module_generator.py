@@ -107,6 +107,7 @@ class ModuleGenerator:
         output_dir: str,
         module_name: Optional[str] = None,
         overwrite: bool = True,
+        all_fields_optional: bool = True,
     ):
         """
         Initialize the module generator.
@@ -116,11 +117,13 @@ class ModuleGenerator:
             output_dir: Path where the module folder will be created
             module_name: Name for the module (default: "mymodule")
             overwrite: Whether to overwrite existing files (default: True)
+            all_fields_optional: If True, all fields get defaults allowing empty constructor (default: True)
         """
         self.schema_dir = Path(schema_dir).resolve()
         self.output_dir = Path(output_dir).resolve()
         self.module_name = module_name or self.DEFAULT_MODULE_NAME
         self.overwrite = overwrite
+        self.all_fields_optional = all_fields_optional
         
         # Module directory is inside output_dir
         self.module_dir = self.output_dir / self.module_name
@@ -174,7 +177,10 @@ class ModuleGenerator:
                         counter += 1
                 
                 processor = SchemaProcessor(schema, root_class_name=class_name)
-                code = processor.generate_code(style="dataclass")
+                code = processor.generate_code(
+                    style="dataclass",
+                    all_fields_optional=self.all_fields_optional
+                )
                 
                 timestamp = datetime.now().isoformat()
                 header = COPYRIGHT.format(version=__module_version__, timestamp=timestamp)
@@ -1189,6 +1195,7 @@ def generate_module(
     output_dir: str,
     module_name: Optional[str] = None,
     overwrite: bool = True,
+    all_fields_optional: bool = True,
 ) -> Dict[str, Any]:
     """
     Generate a Python module from a folder of JSON Schema files.
@@ -1204,6 +1211,7 @@ def generate_module(
         output_dir: Path where the module folder will be created
         module_name: Name for the module (default: "mymodule")
         overwrite: Whether to overwrite existing files (default: True)
+        all_fields_optional: If True, all fields get defaults allowing empty constructor (default: True)
         
     Returns:
         Dictionary with generation results:
@@ -1241,6 +1249,7 @@ def generate_module(
         output_dir=output_dir,
         module_name=module_name,
         overwrite=overwrite,
+        all_fields_optional=all_fields_optional,
     )
     
     return generator.generate()

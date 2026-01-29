@@ -47,6 +47,7 @@ class CodeGenerator:
         style: str = "dataclass",
         include_validators: bool = True,
         include_docstrings: bool = True,
+        all_fields_optional: bool = False,
     ):
         """
         Initialize the code generator.
@@ -59,6 +60,7 @@ class CodeGenerator:
             style: Code style ("dataclass", "attrs", "plain")
             include_validators: Whether to include validation methods
             include_docstrings: Whether to include docstrings
+            all_fields_optional: If True, all fields get default None (allows empty constructor)
         """
         self.schema = schema
         self.resolver = resolver or ReferenceResolver(schema)
@@ -67,6 +69,7 @@ class CodeGenerator:
         self.style = style
         self.include_validators = include_validators
         self.include_docstrings = include_docstrings
+        self.all_fields_optional = all_fields_optional
         
         # Get resolved schema
         self.resolved_schema = self.resolver.resolve_all()
@@ -113,6 +116,10 @@ class CodeGenerator:
         lines.append("")
         lines.append("")
         
+        # Add ValidationResult class first
+        lines.append(self._generate_validation_result_class())
+        lines.append("")
+        
         # Add classes
         for class_code in class_codes:
             lines.append(class_code)
@@ -132,7 +139,24 @@ Each class includes:
 - Type hints for all properties
 - Serialization methods (to_dict, to_json)
 - Deserialization class methods (from_dict, from_json)
+- Validation method to check required fields and enum values
 """'''
+    
+    def _generate_validation_result_class(self) -> str:
+        """Generate the ValidationResult class."""
+        return '''@dataclass
+class ValidationResult:
+    """Result of validation containing status and any errors."""
+    is_valid: bool
+    errors: List[str] = field(default_factory=list)
+    
+    def __str__(self) -> str:
+        if self.is_valid:
+            return "Valid"
+        return f"Invalid: {'; '.join(self.errors)}"
+    
+    def __bool__(self) -> bool:
+        return self.is_valid'''
     
     def _generate_imports(self) -> str:
         """Generate import statements."""
@@ -226,32 +250,52 @@ Each class includes:
         lines.append("        }")
         lines.append("")
         
-        # Generate required fields (no defaults)
-        for field_info in required_fields:
-            comment = self._get_field_comment(field_info["schema"])
-            if comment:
-                lines.append(f"    {field_info['name']}: {field_info['type_hint']}  # {comment}")
-            else:
-                lines.append(f"    {field_info['name']}: {field_info['type_hint']}")
-        
-        # Generate optional fields (with defaults)
-        for field_info in optional_fields:
-            type_hint = field_info["type_hint"]
-            if not type_hint.startswith("Optional"):
-                type_hint = f"Optional[{type_hint}]"
+        # When all_fields_optional is True, treat all fields as optional
+        if self.all_fields_optional:
+            # All fields get default values
+            all_fields = required_fields + optional_fields
+            for field_info in all_fields:
+                type_hint = field_info["type_hint"]
+                # Wrap in Optional if not already
+                if not type_hint.startswith("Optional") and not type_hint.startswith("List[") and not type_hint.startswith("Dict["):
+                    type_hint = f"Optional[{type_hint}]"
+                
+                # Determine default value
+                default = self._get_default_value(field_info["mapping"])
+                
+                comment = self._get_field_comment(field_info["schema"])
+                if comment:
+                    lines.append(f"    {field_info['name']}: {type_hint} = {default}  # {comment}")
+                else:
+                    lines.append(f"    {field_info['name']}: {type_hint} = {default}")
+        else:
+            # Generate required fields (no defaults)
+            for field_info in required_fields:
+                comment = self._get_field_comment(field_info["schema"])
+                if comment:
+                    lines.append(f"    {field_info['name']}: {field_info['type_hint']}  # {comment}")
+                else:
+                    lines.append(f"    {field_info['name']}: {field_info['type_hint']}")
             
-            # Determine default value
-            default = self._get_default_value(field_info["mapping"])
-            
-            comment = self._get_field_comment(field_info["schema"])
-            if comment:
-                lines.append(f"    {field_info['name']}: {type_hint} = {default}  # {comment}")
-            else:
-                lines.append(f"    {field_info['name']}: {type_hint} = {default}")
+            # Generate optional fields (with defaults)
+            for field_info in optional_fields:
+                type_hint = field_info["type_hint"]
+                if not type_hint.startswith("Optional"):
+                    type_hint = f"Optional[{type_hint}]"
+                
+                # Determine default value
+                default = self._get_default_value(field_info["mapping"])
+                
+                comment = self._get_field_comment(field_info["schema"])
+                if comment:
+                    lines.append(f"    {field_info['name']}: {type_hint} = {default}  # {comment}")
+                else:
+                    lines.append(f"    {field_info['name']}: {type_hint} = {default}")
         
-        # Add methods
+        # Add methods - pass required fields and all fields for validation
         lines.append("")
-        lines.extend(self._generate_methods(class_name))
+        all_fields = required_fields + optional_fields
+        lines.extend(self._generate_methods(class_name, required_fields, all_fields))
         
         return "\n".join(lines)
     
@@ -304,9 +348,11 @@ Each class includes:
             return description
         return ""
     
-    def _generate_methods(self, class_name: str) -> List[str]:
-        """Generate serialization methods."""
+    def _generate_methods(self, class_name: str, required_fields: List[Dict] = None, all_fields: List[Dict] = None) -> List[str]:
+        """Generate serialization and validation methods."""
         methods = []
+        required_fields = required_fields or []
+        all_fields = all_fields or []
         
         # to_dict method
         methods.extend([
@@ -360,6 +406,58 @@ Each class includes:
             f"    def from_json(cls, json_str: str) -> '{class_name}':",
             '        """Create instance from JSON string."""',
             "        return cls.from_dict(json.loads(json_str))",
+            "",
+        ])
+        
+        # Generate _get_required_fields method
+        required_field_names = [f['name'] for f in required_fields]
+        methods.extend([
+            "    @classmethod",
+            "    def _get_required_fields(cls) -> List[str]:",
+            '        """Get list of required field names."""',
+            f"        return {required_field_names}",
+            "",
+        ])
+        
+        # Generate _get_enum_constraints method - collect enum info
+        enum_constraints = {}
+        for field_info in all_fields:
+            schema = field_info.get("schema", {})
+            if "enum" in schema:
+                enum_constraints[field_info["name"]] = schema["enum"]
+        
+        methods.extend([
+            "    @classmethod",
+            "    def _get_enum_constraints(cls) -> Dict[str, List[Any]]:",
+            '        """Get enum constraints for fields."""',
+            f"        return {repr(enum_constraints)}",
+            "",
+        ])
+        
+        # Generate validate method
+        methods.extend([
+            "    def validate(self) -> 'ValidationResult':",
+            '        """',
+            '        Validate that all required fields are populated and enum values are valid.',
+            '        ',
+            '        Returns:',
+            '            ValidationResult with is_valid flag and list of errors',
+            '        """',
+            "        errors = []",
+            "        ",
+            "        # Check required fields",
+            "        for field_name in self._get_required_fields():",
+            "            value = getattr(self, field_name, None)",
+            "            if value is None:",
+            "                errors.append(f\"Required field '{field_name}' is not set\")",
+            "        ",
+            "        # Check enum constraints",
+            "        for field_name, valid_values in self._get_enum_constraints().items():",
+            "            value = getattr(self, field_name, None)",
+            "            if value is not None and value not in valid_values:",
+            "                errors.append(f\"Field '{field_name}' has invalid value '{value}'. Must be one of: {valid_values}\")",
+            "        ",
+            "        return ValidationResult(is_valid=len(errors) == 0, errors=errors)",
         ])
         
         return methods

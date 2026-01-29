@@ -213,6 +213,7 @@ class SchemaProcessor:
         self,
         style: str = "dataclass",
         include_validators: bool = True,
+        all_fields_optional: bool = False,
     ) -> str:
         """
         Generate Python source code from the schema.
@@ -220,6 +221,7 @@ class SchemaProcessor:
         Args:
             style: Code style ("dataclass" or "attrs")
             include_validators: Whether to include validation methods
+            all_fields_optional: If True, all fields get defaults (allows empty constructor)
             
         Returns:
             Python source code as string
@@ -234,6 +236,7 @@ class SchemaProcessor:
             root_class_name=self.root_class_name,
             style=style,
             include_validators=include_validators,
+            all_fields_optional=all_fields_optional,
         )
         
         return generator.generate()
