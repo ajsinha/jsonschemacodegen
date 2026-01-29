@@ -2,7 +2,7 @@
 """
 JsonSchemaCodeGen - Main Entry Point and CLI
 
-Copyright © 2025-2030, All Rights Reserved
+Copyright (C) 2025-2030, All Rights Reserved
 Ashutosh Sinha
 Email: ajsinha@gmail.com
 
@@ -37,14 +37,14 @@ from jsonschemacodegen.utils import load_schema, save_code
 def print_banner():
     """Print the application banner."""
     banner = f"""
-╔══════════════════════════════════════════════════════════════════╗
-║                     JsonSchemaCodeGen v{__version__}                      ║
-║                                                                  ║
-║  Commercial Grade JSON Schema to Python Code Generator           ║
-║                                                                  ║
-║  Copyright © 2025-2030, All Rights Reserved                      ║
-║  Ashutosh Sinha (ajsinha@gmail.com)                              ║
-╚══════════════════════════════════════════════════════════════════╝
++==================================================================+
+|                     JsonSchemaCodeGen v{__version__}                      |
+|                                                                  |
+|  Commercial Grade JSON Schema to Python Code Generator           |
+|                                                                  |
+|  Copyright (C) 2025-2030, All Rights Reserved                      |
+|  Ashutosh Sinha (ajsinha@gmail.com)                              |
++==================================================================+
 """
     print(banner)
 
@@ -58,7 +58,7 @@ def cmd_generate_classes(args):
     
     if args.output:
         save_code(code, args.output)
-        print(f"✓ Generated code saved to: {args.output}")
+        print(f"[OK] Generated code saved to: {args.output}")
     else:
         print(code)
 
@@ -72,7 +72,7 @@ def cmd_generate_module(args):
         overwrite=True,
     )
     
-    print(f"✓ Module generation complete!")
+    print(f"[OK] Module generation complete!")
     print(f"  Schemas processed: {result['schemas_processed']}")
     print(f"  Classes generated: {len(result['classes_generated'])}")
     
@@ -86,7 +86,7 @@ def cmd_generate_module(args):
     if result['errors']:
         print(f"\n  Errors:")
         for err in result['errors']:
-            print(f"    ✗ {err}")
+            print(f"    [ERROR] {err}")
 
 
 def cmd_generate_samples(args):
@@ -104,7 +104,7 @@ def cmd_generate_samples(args):
     if args.output:
         with open(args.output, "w") as f:
             f.write(output)
-        print(f"✓ Generated {args.count} sample(s) saved to: {args.output}")
+        print(f"[OK] Generated {args.count} sample(s) saved to: {args.output}")
     else:
         print(output)
 
@@ -124,9 +124,9 @@ def cmd_validate(args):
         result = validator.validate_schema(schema)
     
     if result.is_valid:
-        print("✓ Validation passed!")
+        print("[OK] Validation passed!")
     else:
-        print("✗ Validation failed:")
+        print("[ERROR] Validation failed:")
         for issue in result.issues:
             print(f"  - [{issue.severity.value}] {issue.path}: {issue.message}")
     
@@ -197,19 +197,19 @@ Available commands:
             try:
                 schema = load_schema(parts[1])
                 processor = SchemaProcessor(schema)
-                print(f"✓ Loaded schema from {parts[1]}")
+                print(f"[OK] Loaded schema from {parts[1]}")
             except Exception as e:
-                print(f"✗ Error loading schema: {e}")
+                print(f"[ERROR] Error loading schema: {e}")
         
         elif action == "classes":
             if processor is None:
-                print("✗ No schema loaded. Use 'load <schema.json>' first.")
+                print("[ERROR] No schema loaded. Use 'load <schema.json>' first.")
                 continue
             print(processor.generate_code())
         
         elif action == "samples":
             if processor is None:
-                print("✗ No schema loaded. Use 'load <schema.json>' first.")
+                print("[ERROR] No schema loaded. Use 'load <schema.json>' first.")
                 continue
             count = int(parts[1]) if len(parts) > 1 else 1
             samples = processor.generate_samples(count=count)
@@ -217,7 +217,7 @@ Available commands:
         
         elif action == "info":
             if processor is None:
-                print("✗ No schema loaded. Use 'load <schema.json>' first.")
+                print("[ERROR] No schema loaded. Use 'load <schema.json>' first.")
                 continue
             info = processor.parse()
             print(f"Title: {info.title}")
@@ -226,7 +226,7 @@ Available commands:
         
         elif action == "validate":
             if processor is None:
-                print("✗ No schema loaded. Use 'load <schema.json>' first.")
+                print("[ERROR] No schema loaded. Use 'load <schema.json>' first.")
                 continue
             if len(parts) < 2:
                 print("Usage: validate <data.json>")
@@ -236,13 +236,13 @@ Available commands:
                     data = json.load(f)
                 result = processor.validate_data(data)
                 if result.is_valid:
-                    print("✓ Validation passed!")
+                    print("[OK] Validation passed!")
                 else:
-                    print("✗ Validation failed:")
+                    print("[ERROR] Validation failed:")
                     for issue in result.issues:
                         print(f"  - {issue.path}: {issue.message}")
             except Exception as e:
-                print(f"✗ Error: {e}")
+                print(f"[ERROR] Error: {e}")
         
         else:
             print(f"Unknown command: {action}. Type 'help' for available commands.")
@@ -253,7 +253,7 @@ def main():
     parser = argparse.ArgumentParser(
         prog="jsonschemacodegen",
         description="JsonSchemaCodeGen - Generate Python code from JSON Schema",
-        epilog="Copyright © 2025-2030 Ashutosh Sinha. All Rights Reserved.",
+        epilog="Copyright (C) 2025-2030 Ashutosh Sinha. All Rights Reserved.",
     )
     
     parser.add_argument(

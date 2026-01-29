@@ -1,7 +1,7 @@
 """
 Generators Package - Code and data generation from JSON Schema.
 
-Copyright © 2025-2030, All Rights Reserved
+Copyright (C) 2025-2030, All Rights Reserved
 Ashutosh Sinha
 Email: ajsinha@gmail.com
 

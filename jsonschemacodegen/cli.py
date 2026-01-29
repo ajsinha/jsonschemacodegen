@@ -1,6 +1,6 @@
 """
 
-Copyright © 2025-2030, All Rights Reserved
+Copyright (C) 2025-2030, All Rights Reserved
 Ashutosh Sinha
 Email: ajsinha@gmail.com
 
@@ -59,14 +59,14 @@ Examples:
   Analyze schema complexity:
     jsonschemacodegen info -s schema.json
 
-Copyright © 2025-2030, Ashutosh Sinha. All Rights Reserved.
+Copyright (C) 2025-2030, Ashutosh Sinha. All Rights Reserved.
 """,
     )
     
     parser.add_argument(
         "--version",
         action="version",
-        version="%(prog)s 1.1.0",
+        version="%(prog)s 1.2.0",
     )
     
     subparsers = parser.add_subparsers(dest="command", help="Command to run")
@@ -239,11 +239,11 @@ def cmd_generate(args) -> int:
         with open(output_path, "w", encoding="utf-8") as f:
             f.write(code)
         
-        print(f"✓ Generated code written to {args.output}")
+        print(f"[OK] Generated code written to {args.output}")
         return 0
         
     except Exception as e:
-        print(f"✗ Error: {e}", file=sys.stderr)
+        print(f"[ERROR] Error: {e}", file=sys.stderr)
         return 1
 
 
@@ -261,7 +261,7 @@ def cmd_generate_module(args) -> int:
         
         result = generator.generate()
         
-        print(f"✓ Module generation complete!")
+        print(f"[OK] Module generation complete!")
         print(f"  Module name: {result['module_name']}")
         print(f"  Module path: {result['module_path']}")
         print(f"  Schemas processed: {result['schemas_processed']}")
@@ -278,7 +278,7 @@ def cmd_generate_module(args) -> int:
         if result['errors']:
             print(f"\n  Errors:")
             for error in result['errors']:
-                print(f"    ✗ {error}")
+                print(f"    [ERROR] {error}")
         
         print(f"\n  Usage:")
         print(f"    from {result['module_name']} import User, load_json, to_json")
@@ -287,7 +287,7 @@ def cmd_generate_module(args) -> int:
         return 0 if not result['errors'] else 1
         
     except Exception as e:
-        print(f"✗ Error: {e}", file=sys.stderr)
+        print(f"[ERROR] Error: {e}", file=sys.stderr)
         return 1
 
 
@@ -312,14 +312,14 @@ def cmd_sample(args) -> int:
         if args.output:
             with open(args.output, "w", encoding="utf-8") as f:
                 f.write(output)
-            print(f"✓ Generated {args.count} sample(s) to {args.output}")
+            print(f"[OK] Generated {args.count} sample(s) to {args.output}")
         else:
             print(output)
         
         return 0
         
     except Exception as e:
-        print(f"✗ Error: {e}", file=sys.stderr)
+        print(f"[ERROR] Error: {e}", file=sys.stderr)
         return 1
 
 
@@ -337,14 +337,14 @@ def cmd_validate(args) -> int:
         
         print("Schema Validation:")
         if schema_result.is_valid:
-            print("  ✓ Schema is valid")
+            print("  [OK] Schema is valid")
         else:
-            print("  ✗ Schema has errors:")
+            print("  [ERROR] Schema has errors:")
             for issue in schema_result.errors:
                 print(f"    - {issue.path}: {issue.message}")
         
         for warning in schema_result.warnings:
-            print(f"  ⚠ Warning at {warning.path}: {warning.message}")
+            print(f"  [WARN] Warning at {warning.path}: {warning.message}")
         
         # Validate data if provided
         if args.data:
@@ -355,9 +355,9 @@ def cmd_validate(args) -> int:
             
             print("\nData Validation:")
             if data_result.is_valid:
-                print("  ✓ Data is valid")
+                print("  [OK] Data is valid")
             else:
-                print("  ✗ Data has errors:")
+                print("  [ERROR] Data has errors:")
                 for issue in data_result.errors:
                     print(f"    - {issue.path}: {issue.message}")
             
@@ -366,7 +366,7 @@ def cmd_validate(args) -> int:
         return 0 if schema_result.is_valid else 1
         
     except Exception as e:
-        print(f"✗ Error: {e}", file=sys.stderr)
+        print(f"[ERROR] Error: {e}", file=sys.stderr)
         return 1
 
 
@@ -416,7 +416,7 @@ def cmd_info(args) -> int:
         return 0
         
     except Exception as e:
-        print(f"✗ Error: {e}", file=sys.stderr)
+        print(f"[ERROR] Error: {e}", file=sys.stderr)
         return 1
 
 
@@ -435,18 +435,18 @@ def cmd_convert(args) -> int:
                 with open(output_path, "w", encoding="utf-8") as f:
                     yaml.dump(schema, f, default_flow_style=False, sort_keys=False)
             except ImportError:
-                print("✗ Error: PyYAML is required for YAML output", file=sys.stderr)
+                print("[ERROR] Error: PyYAML is required for YAML output", file=sys.stderr)
                 print("  Install with: pip install pyyaml", file=sys.stderr)
                 return 1
         else:
             with open(output_path, "w", encoding="utf-8") as f:
                 json.dump(schema, f, indent=2)
         
-        print(f"✓ Converted schema written to {args.output}")
+        print(f"[OK] Converted schema written to {args.output}")
         return 0
         
     except Exception as e:
-        print(f"✗ Error: {e}", file=sys.stderr)
+        print(f"[ERROR] Error: {e}", file=sys.stderr)
         return 1
 
 

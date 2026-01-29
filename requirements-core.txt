@@ -1,6 +1,6 @@
-# JsonSchemaCodeGen v1.0.0 - Core Requirements
+# JsonSchemaCodeGen v1.2.0 - Core Requirements
 #
-# Copyright © 2025-2030, All Rights Reserved
+# Copyright (C) 2025-2030, All Rights Reserved
 # Ashutosh Sinha
 # Email: ajsinha@gmail.com
 #

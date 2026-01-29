@@ -1,63 +1,22 @@
-# JsonSchemaCodeGen v1.0.0 - Requirements
+# JsonSchemaCodeGen v1.2.0 - All Requirements
 #
-# Copyright © 2025-2030, All Rights Reserved
+# Copyright (C) 2025-2030, All Rights Reserved
 # Ashutosh Sinha
 # Email: ajsinha@gmail.com
 #
-# ============================================================================
-# INSTALLATION
-# ============================================================================
-#
-# Basic installation (core only, no external dependencies):
-#   pip install .
-#
-# With all optional features:
-#   pip install -r requirements.txt
-#
-# ============================================================================
+# Install with: pip install .[all]
 
-# ============================================================================
-# CORE DEPENDENCIES (None - Pure Python)
-# ============================================================================
-# JsonSchemaCodeGen core has no required dependencies.
-# All core functionality works with Python 3.8+ standard library.
-
-# ============================================================================
-# OPTIONAL DEPENDENCIES
-# ============================================================================
-
-# --- Realistic Sample Data Generation ---
-# Enables realistic fake data (names, emails, addresses, etc.)
+# Optional: Realistic sample data generation
 faker>=18.0.0
 
-# --- Remote Schema Fetching ---
-# Enables fetching schemas from HTTP/HTTPS URLs
+# Optional: Remote schema fetching
 requests>=2.28.0
 
-# --- Enhanced Validation ---
-# Provides full JSON Schema validation support
+# Optional: Enhanced validation
 jsonschema>=4.17.0
 
-# ============================================================================
-# DEVELOPMENT DEPENDENCIES
-# ============================================================================
+# Optional: YAML schema support
+pyyaml>=6.0
 
-# --- Testing ---
-pytest>=7.0.0
-pytest-cov>=4.0.0
-
-# --- Code Formatting ---
-black>=23.0.0
-isort>=5.12.0
-
-# --- Type Checking ---
-mypy>=1.0.0
-
-# --- Linting ---
-flake8>=6.0.0
-
-# ============================================================================
-# PYTHON VERSION
-# ============================================================================
-# Requires Python 3.8 or higher
-# Tested on: Python 3.8, 3.9, 3.10, 3.11, 3.12
+# Optional: Rich console output
+rich>=13.0.0

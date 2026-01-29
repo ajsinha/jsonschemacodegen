@@ -1,46 +1,29 @@
-# JsonSchemaCodeGen v1.0.0 - Development Requirements
+# JsonSchemaCodeGen v1.2.0 - Development Requirements
 #
-# Copyright © 2025-2030, All Rights Reserved
+# Copyright (C) 2025-2030, All Rights Reserved
 # Ashutosh Sinha
 # Email: ajsinha@gmail.com
 #
-# Install with: pip install -r requirements-dev.txt
-#
-# Includes all optional dependencies plus development tools.
+# Install with: pip install .[dev]
 
-# ============================================================================
-# OPTIONAL DEPENDENCIES (All)
-# ============================================================================
+# Testing
+pytest>=7.0.0
+pytest-cov>=4.0.0
+pytest-asyncio>=0.21.0
+
+# Code quality
+black>=23.0.0
+isort>=5.12.0
+flake8>=6.0.0
+mypy>=1.0.0
+
+# Documentation
+sphinx>=6.0.0
+sphinx-rtd-theme>=1.2.0
+
+# All runtime dependencies
 faker>=18.0.0
 requests>=2.28.0
 jsonschema>=4.17.0
-
-# ============================================================================
-# TESTING
-# ============================================================================
-pytest>=7.0.0
-pytest-cov>=4.0.0
-pytest-xdist>=3.0.0
-
-# ============================================================================
-# CODE QUALITY
-# ============================================================================
-# Formatting
-black>=23.0.0
-isort>=5.12.0
-
-# Linting
-flake8>=6.0.0
-flake8-docstrings>=1.7.0
-flake8-bugbear>=23.0.0
-
-# Type checking
-mypy>=1.0.0
-types-requests>=2.28.0
-
-# ============================================================================
-# BUILD & RELEASE
-# ============================================================================
-build>=1.0.0
-twine>=4.0.0
-wheel>=0.42.0
+pyyaml>=6.0
+rich>=13.0.0

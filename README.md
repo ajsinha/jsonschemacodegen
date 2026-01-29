@@ -1,23 +1,23 @@
-# JsonSchemaCodeGen v1.1.0
+# JsonSchemaCodeGen v1.2.0
 
 ```
-╔══════════════════════════════════════════════════════════════════════════════╗
-║                                                                              ║
-║                        JsonSchemaCodeGen v1.1.0                              ║
-║                                                                              ║
-║            Commercial Grade JSON Schema to Python Code Generator             ║
-║                                                                              ║
-║                  Copyright © 2025-2030, All Rights Reserved                  ║
-║                      Ashutosh Sinha (ajsinha@gmail.com)                      ║
-║                                                                              ║
-╚══════════════════════════════════════════════════════════════════════════════╝
++==============================================================================+
+|                                                                              |
+|                        JsonSchemaCodeGen v1.2.0                              |
+|                                                                              |
+|            Commercial Grade JSON Schema to Python Code Generator             |
+|                                                                              |
+|                  Copyright (C) 2025-2030, All Rights Reserved                |
+|                      Ashutosh Sinha (ajsinha@gmail.com)                      |
+|                                                                              |
++==============================================================================+
 ```
 
 ---
 
 ## Copyright and Legal Notice
 
-**Copyright © 2025-2030, All Rights Reserved**  
+**Copyright (C) 2025-2030, All Rights Reserved**  
 **Ashutosh Sinha**  
 **Email: ajsinha@gmail.com**
 
@@ -31,12 +31,12 @@ This software is proprietary and confidential. Unauthorized copying, distributio
 
 **JsonSchemaCodeGen** is a comprehensive, commercial-grade Python library for working with JSON Schema. It provides powerful, production-ready tools for:
 
-- 🔧 **Schema Parsing**: Parse and analyze JSON Schema documents with full Draft-07 support
-- 💻 **Code Generation**: Generate Python dataclasses from JSON Schema
-- 📊 **Sample Data Generation**: Create realistic test data with Faker integration
-- ✅ **Validation**: Validate schemas and data with detailed error reporting
-- 🔗 **Reference Resolution**: Handle complex `$ref` references including remote schemas
-- 📦 **Module Generation**: Generate complete Python modules from schema folders
+- Schema Parsing: Parse and analyze JSON Schema documents with full Draft-07 support
+- Code Generation: Generate Python dataclasses from JSON Schema
+- Sample Data Generation: Create realistic test data with Faker integration
+- Validation: Validate schemas and data with detailed error reporting
+- Reference Resolution: Handle complex `$ref` references including remote schemas
+- Module Generation: Generate complete Python modules from schema folders
 
 ---
 
@@ -56,15 +56,23 @@ python -m jsonschemacodegen generate-module \
 Creates:
 ```
 output/
-└── mymodels/                # Module folder inside output-dir
-    ├── __init__.py          # Main module exports
-    ├── __main__.py          # CLI support
-    ├── driver.py            # JSON utilities
-    ├── main.py              # High-level functions
-    └── generated/           # Generated dataclasses
-        ├── __init__.py
-        └── *.py
++-- mymodels/                # Module folder inside output-dir
+    +-- __init__.py          # Main module exports
+    +-- __main__.py          # CLI support
+    +-- driver.py            # JSON utilities
+    +-- main.py              # High-level functions
+    +-- generated/           # Generated dataclasses
+        +-- __init__.py
+        +-- *.py
 ```
+
+### Generated Class Features
+
+- No-argument constructor: `user = User()`
+- Value assignment after creation: `user.name = "John"`
+- Validation method: `result = user.validate()`
+  - Checks required fields are populated
+  - Validates enum values
 
 ### Code Generation
 
@@ -72,15 +80,15 @@ Generate Python dataclasses with full type hints, serialization methods, and val
 
 ### Sample Data Generation
 
-- 🎭 **Faker Integration**: Realistic names, emails, addresses, etc.
-- 📏 **Constraint-Aware**: Respects min/max, patterns, formats
-- 🎯 **Format-Specific**: Proper UUID, email, datetime generation
+- Faker Integration: Realistic names, emails, addresses, etc.
+- Constraint-Aware: Respects min/max, patterns, formats
+- Format-Specific: Proper UUID, email, datetime generation
 
 ### Validation
 
-- 📋 Schema structure validation
-- 📊 Data validation against schema
-- 📍 Detailed error paths
+- Schema structure validation
+- Data validation against schema
+- Detailed error paths
 
 ---
 
@@ -123,19 +131,24 @@ sys.path.insert(0, "output")
 from mymodels import User, Product, Order
 from mymodels import load_json, to_json, generate_sample
 
-# Load from JSON
-user = load_json("user.json", "User")
+# Create instance with no arguments
+user = User()
+user.id_ = "123"
+user.name = "John"
+user.email = "john@example.com"
 
-# Generate sample data
-sample = generate_sample("User")
+# Validate
+result = user.validate()
+if result.is_valid:
+    print("User is valid!")
+else:
+    print("Errors:", result.errors)
 
-# Create and save
-user = User(id_="123", name="John", email="john@example.com")
+# Serialize
 to_json(user, "output/user.json")
 
-# Use CLI
-# python -m mymodels list
-# python -m mymodels sample User -o sample.json
+# Load from JSON
+loaded_user = load_json("user.json", "User")
 ```
 
 ### Single Schema Processing
@@ -220,19 +233,20 @@ python -m mymodels validate user.json User
 
 ```
 jsonschemacodegen/
-├── jsonschemacodegen/           # Main package
-│   ├── __init__.py              # Public API exports
-│   ├── cli.py                   # CLI implementation
-│   ├── module_generator.py      # Module generation
-│   ├── core/                    # Core processing
-│   ├── generators/              # Code generators
-│   ├── models/                  # Data models
-│   └── utils/                   # Utilities
-├── examples/schemas/            # 22+ example schemas
-├── docs/                        # Documentation
-├── tests/                       # Test suite
-├── main.py                      # Demo script
-└── README.md
++-- jsonschemacodegen/           # Main package
+|   +-- __init__.py              # Public API exports
+|   +-- cli.py                   # CLI implementation
+|   +-- module_generator.py      # Module generation
+|   +-- core/                    # Core processing
+|   +-- generators/              # Code generators
+|   +-- models/                  # Data models
+|   +-- utils/                   # Utilities
++-- examples/schemas/            # 22+ example schemas
++-- docs/                        # Documentation
++-- tests/                       # Test suite
++-- main.py                      # Demo script
++-- generate.py                  # Module generator script
++-- README.md
 ```
 
 ---
@@ -264,4 +278,4 @@ jsonschemacodegen/
 
 This software is proprietary and confidential. See [LICENSE](LICENSE) for full terms.
 
-**Copyright © 2025-2030, All Rights Reserved**
+**Copyright (C) 2025-2030, All Rights Reserved**

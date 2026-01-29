@@ -1,7 +1,7 @@
 """
 JsonSchemaCodeGen - Setup Configuration
 
-Copyright © 2025-2030, All Rights Reserved
+Copyright (C) 2025-2030, All Rights Reserved
 Ashutosh Sinha
 Email: ajsinha@gmail.com
 """
@@ -10,7 +10,7 @@ from setuptools import setup, find_packages
 from pathlib import Path
 
 # Read version
-version = "1.1.0"
+version = "1.2.0"
 
 # Read long description
 readme_path = Path(__file__).parent / "README.md"

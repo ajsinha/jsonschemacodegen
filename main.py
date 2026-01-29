@@ -2,7 +2,7 @@
 """
 JsonSchemaCodeGen - Comprehensive Demonstration Script
 
-Copyright © 2025-2030, All Rights Reserved
+Copyright (C) 2025-2030, All Rights Reserved
 Ashutosh Sinha
 Email: ajsinha@gmail.com
 
@@ -1311,7 +1311,7 @@ def demo_module_generation():
             module_name="demo_models",
         )
         
-        print(f"\n✓ Module generation complete!")
+        print(f"\n[OK] Module generation complete!")
         print(f"  Module name: {result['module_name']}")
         print(f"  Module path: {result['module_path']}")
         print(f"  Schemas processed: {result['schemas_processed']}")
@@ -1525,7 +1525,7 @@ def main():
     print("=" * 78)
     print("  JsonSchemaCodeGen v{} - Comprehensive Demonstration".format(__version__))
     print("=" * 78)
-    print("\nCopyright © 2025-2030, Ashutosh Sinha. All Rights Reserved.")
+    print("\nCopyright (C) 2025-2030, Ashutosh Sinha. All Rights Reserved.")
     print("This software is proprietary and confidential.\n")
     
     demos = [
@@ -1564,7 +1564,7 @@ def main():
             demo_func()
             successful += 1
         except Exception as e:
-            print(f"\n✗ Error during '{name}': {e}")
+            print(f"\n[ERROR] Error during '{name}': {e}")
             import traceback
             traceback.print_exc()
             failed += 1

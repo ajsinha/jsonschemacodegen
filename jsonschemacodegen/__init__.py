@@ -2,7 +2,7 @@
 JsonSchemaCodeGen - Commercial Grade JSON Schema to Python Code Generator
 =========================================================================
 
-Copyright © 2025-2030, All Rights Reserved
+Copyright (C) 2025-2030, All Rights Reserved
 Ashutosh Sinha
 Email: ajsinha@gmail.com
 
@@ -38,7 +38,7 @@ Usage:
     generate_module("schemas/", "myapp/models")
 """
 
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 __author__ = "Ashutosh Sinha"
 __email__ = "ajsinha@gmail.com"
 

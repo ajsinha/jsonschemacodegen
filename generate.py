@@ -2,7 +2,7 @@
 """
 JsonSchemaCodeGen - Module Generator
 
-Copyright © 2025-2030, All Rights Reserved
+Copyright (C) 2025-2030, All Rights Reserved
 Ashutosh Sinha
 Email: ajsinha@gmail.com
 
@@ -48,16 +48,16 @@ Examples:
 
 Output Structure:
   output_dir/
-  └── module_name/
-      ├── __init__.py      # Main exports
-      ├── __main__.py      # CLI entry point
-      ├── driver.py        # JSON utilities
-      ├── main.py          # High-level functions
-      └── generated/
-          ├── __init__.py  # Class registry
-          └── *.py         # Generated dataclasses
+  `-- module_name/
+      |-- __init__.py      # Main exports
+      |-- __main__.py      # CLI entry point
+      |-- driver.py        # JSON utilities
+      |-- main.py          # High-level functions
+      `-- generated/
+          |-- __init__.py  # Class registry
+          `-- *.py         # Generated dataclasses
 
-Copyright © 2025-2030, Ashutosh Sinha. All Rights Reserved.
+Copyright (C) 2025-2030, Ashutosh Sinha. All Rights Reserved.
 """,
     )
     
@@ -116,7 +116,7 @@ Copyright © 2025-2030, Ashutosh Sinha. All Rights Reserved.
             overwrite=args.overwrite,
         )
         
-        print(f"✓ Module generation complete!")
+        print(f"[OK] Module generation complete!")
         print(f"  Module name: {result['module_name']}")
         print(f"  Module path: {result['module_path']}")
         print(f"  Schemas processed: {result['schemas_processed']}")
@@ -131,7 +131,7 @@ Copyright © 2025-2030, Ashutosh Sinha. All Rights Reserved.
         if result['errors']:
             print(f"\nErrors:")
             for error in result['errors']:
-                print(f"  ✗ {error}")
+                print(f"  [ERROR] {error}")
             return 1
         
         print(f"\nUsage:")

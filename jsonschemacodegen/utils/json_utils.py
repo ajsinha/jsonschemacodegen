@@ -1,7 +1,7 @@
 """
 JSON Utilities - Helper functions for JSON Schema manipulation.
 
-Copyright © 2025-2030, All Rights Reserved
+Copyright (C) 2025-2030, All Rights Reserved
 Ashutosh Sinha
 Email: ajsinha@gmail.com
 
