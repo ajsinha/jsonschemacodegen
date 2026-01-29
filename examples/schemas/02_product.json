@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "product.json",
+  "title": "Product",
+  "description": "E-commerce product with variants",
+  "type": "object",
+  "definitions": {
+    "Price": {
+      "type": "object",
+      "properties": {
+        "amount": { "type": "integer", "minimum": 0 },
+        "currency": { "type": "string", "enum": ["USD", "EUR", "GBP"] }
+      },
+      "required": ["amount", "currency"]
+    },
+    "Variant": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "format": "uuid" },
+        "sku": { "type": "string" },
+        "name": { "type": "string" },
+        "price": { "$ref": "#/definitions/Price" },
+        "inventory": { "type": "integer", "minimum": 0 },
+        "attributes": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        }
+      },
+      "required": ["id", "sku", "price"]
+    },
+    "Category": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "slug": { "type": "string" },
+        "parent": { "$ref": "#/definitions/Category" }
+      },
+      "required": ["id", "name"]
+    }
+  },
+  "properties": {
+    "id": { "type": "string", "format": "uuid" },
+    "name": { "type": "string", "minLength": 1 },
+    "slug": { "type": "string" },
+    "description": { "type": "string" },
+    "status": { "type": "string", "enum": ["draft", "active", "archived"] },
+    "categories": { "type": "array", "items": { "$ref": "#/definitions/Category" } },
+    "variants": { "type": "array", "items": { "$ref": "#/definitions/Variant" }, "minItems": 1 },
+    "images": { "type": "array", "items": { "type": "string", "format": "uri" } },
+    "tags": { "type": "array", "items": { "type": "string" } },
+    "createdAt": { "type": "string", "format": "date-time" }
+  },
+  "required": ["id", "name", "status", "variants"]
+}

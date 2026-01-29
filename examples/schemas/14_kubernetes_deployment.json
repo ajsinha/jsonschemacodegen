@@ -1,0 +1,188 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "kubernetes_deployment.json",
+  "title": "KubernetesDeployment",
+  "description": "Kubernetes Deployment specification",
+  "type": "object",
+  "definitions": {
+    "LabelSelector": {
+      "type": "object",
+      "properties": {
+        "matchLabels": { "type": "object", "additionalProperties": { "type": "string" } },
+        "matchExpressions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "key": { "type": "string" },
+              "operator": { "type": "string", "enum": ["In", "NotIn", "Exists", "DoesNotExist"] },
+              "values": { "type": "array", "items": { "type": "string" } }
+            },
+            "required": ["key", "operator"]
+          }
+        }
+      }
+    },
+    "Container": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "image": { "type": "string" },
+        "imagePullPolicy": { "type": "string", "enum": ["Always", "Never", "IfNotPresent"] },
+        "command": { "type": "array", "items": { "type": "string" } },
+        "args": { "type": "array", "items": { "type": "string" } },
+        "env": { "type": "array", "items": { "$ref": "#/definitions/EnvVar" } },
+        "ports": { "type": "array", "items": { "$ref": "#/definitions/ContainerPort" } },
+        "resources": { "$ref": "#/definitions/ResourceRequirements" },
+        "volumeMounts": { "type": "array", "items": { "$ref": "#/definitions/VolumeMount" } },
+        "livenessProbe": { "$ref": "#/definitions/Probe" },
+        "readinessProbe": { "$ref": "#/definitions/Probe" }
+      },
+      "required": ["name", "image"]
+    },
+    "EnvVar": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "value": { "type": "string" },
+        "valueFrom": {
+          "type": "object",
+          "properties": {
+            "configMapKeyRef": { "$ref": "#/definitions/KeyRef" },
+            "secretKeyRef": { "$ref": "#/definitions/KeyRef" }
+          }
+        }
+      },
+      "required": ["name"]
+    },
+    "KeyRef": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "key": { "type": "string" }
+      },
+      "required": ["name", "key"]
+    },
+    "ContainerPort": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "containerPort": { "type": "integer", "minimum": 1, "maximum": 65535 },
+        "protocol": { "type": "string", "enum": ["TCP", "UDP"] }
+      },
+      "required": ["containerPort"]
+    },
+    "ResourceRequirements": {
+      "type": "object",
+      "properties": {
+        "limits": { "type": "object", "additionalProperties": { "type": "string" } },
+        "requests": { "type": "object", "additionalProperties": { "type": "string" } }
+      }
+    },
+    "VolumeMount": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "mountPath": { "type": "string" },
+        "readOnly": { "type": "boolean" },
+        "subPath": { "type": "string" }
+      },
+      "required": ["name", "mountPath"]
+    },
+    "Probe": {
+      "type": "object",
+      "properties": {
+        "httpGet": {
+          "type": "object",
+          "properties": {
+            "path": { "type": "string" },
+            "port": { "type": "integer" },
+            "scheme": { "type": "string", "enum": ["HTTP", "HTTPS"] }
+          },
+          "required": ["path", "port"]
+        },
+        "tcpSocket": {
+          "type": "object",
+          "properties": {
+            "port": { "type": "integer" }
+          },
+          "required": ["port"]
+        },
+        "initialDelaySeconds": { "type": "integer" },
+        "periodSeconds": { "type": "integer" },
+        "timeoutSeconds": { "type": "integer" },
+        "failureThreshold": { "type": "integer" }
+      }
+    },
+    "Volume": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "configMap": { "type": "object", "properties": { "name": { "type": "string" } } },
+        "secret": { "type": "object", "properties": { "secretName": { "type": "string" } } },
+        "persistentVolumeClaim": { "type": "object", "properties": { "claimName": { "type": "string" } } },
+        "emptyDir": { "type": "object" }
+      },
+      "required": ["name"]
+    }
+  },
+  "properties": {
+    "apiVersion": { "type": "string", "const": "apps/v1" },
+    "kind": { "type": "string", "const": "Deployment" },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "namespace": { "type": "string" },
+        "labels": { "type": "object", "additionalProperties": { "type": "string" } },
+        "annotations": { "type": "object", "additionalProperties": { "type": "string" } }
+      },
+      "required": ["name"]
+    },
+    "spec": {
+      "type": "object",
+      "properties": {
+        "replicas": { "type": "integer", "minimum": 0 },
+        "selector": { "$ref": "#/definitions/LabelSelector" },
+        "template": {
+          "type": "object",
+          "properties": {
+            "metadata": {
+              "type": "object",
+              "properties": {
+                "labels": { "type": "object", "additionalProperties": { "type": "string" } }
+              }
+            },
+            "spec": {
+              "type": "object",
+              "properties": {
+                "containers": { "type": "array", "items": { "$ref": "#/definitions/Container" }, "minItems": 1 },
+                "initContainers": { "type": "array", "items": { "$ref": "#/definitions/Container" } },
+                "volumes": { "type": "array", "items": { "$ref": "#/definitions/Volume" } },
+                "serviceAccountName": { "type": "string" },
+                "nodeSelector": { "type": "object", "additionalProperties": { "type": "string" } }
+              },
+              "required": ["containers"]
+            }
+          },
+          "required": ["spec"]
+        },
+        "strategy": {
+          "type": "object",
+          "properties": {
+            "type": { "type": "string", "enum": ["RollingUpdate", "Recreate"] },
+            "rollingUpdate": {
+              "type": "object",
+              "properties": {
+                "maxSurge": { "type": ["integer", "string"] },
+                "maxUnavailable": { "type": ["integer", "string"] }
+              }
+            }
+          }
+        }
+      },
+      "required": ["replicas", "selector", "template"]
+    }
+  },
+  "required": ["apiVersion", "kind", "metadata", "spec"]
+}

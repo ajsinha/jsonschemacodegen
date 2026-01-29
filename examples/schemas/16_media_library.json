@@ -1,0 +1,120 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "media_library.json",
+  "title": "MediaAsset",
+  "description": "Digital media asset with metadata and variants",
+  "type": "object",
+  "definitions": {
+    "MediaVariant": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "url": { "type": "string", "format": "uri" },
+        "format": { "type": "string" },
+        "quality": { "type": "string", "enum": ["original", "high", "medium", "low", "thumbnail"] },
+        "width": { "type": "integer", "minimum": 1 },
+        "height": { "type": "integer", "minimum": 1 },
+        "duration": { "type": "number", "minimum": 0 },
+        "bitrate": { "type": "integer" },
+        "fileSize": { "type": "integer" }
+      },
+      "required": ["id", "url", "format"]
+    },
+    "MediaMetadata": {
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "artist": { "type": "string" },
+        "album": { "type": "string" },
+        "genre": { "type": "array", "items": { "type": "string" } },
+        "year": { "type": "integer" },
+        "track": { "type": "integer" },
+        "copyright": { "type": "string" },
+        "license": { "type": "string" },
+        "location": { "$ref": "#/definitions/GeoLocation" },
+        "camera": { "$ref": "#/definitions/CameraInfo" },
+        "custom": { "type": "object", "additionalProperties": true }
+      }
+    },
+    "GeoLocation": {
+      "type": "object",
+      "properties": {
+        "latitude": { "type": "number" },
+        "longitude": { "type": "number" },
+        "altitude": { "type": "number" },
+        "placeName": { "type": "string" }
+      }
+    },
+    "CameraInfo": {
+      "type": "object",
+      "properties": {
+        "make": { "type": "string" },
+        "model": { "type": "string" },
+        "aperture": { "type": "string" },
+        "exposureTime": { "type": "string" },
+        "iso": { "type": "integer" },
+        "focalLength": { "type": "string" }
+      }
+    },
+    "Transcript": {
+      "type": "object",
+      "properties": {
+        "language": { "type": "string" },
+        "segments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number" },
+              "end": { "type": "number" },
+              "text": { "type": "string" },
+              "speaker": { "type": "string" },
+              "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+            },
+            "required": ["start", "end", "text"]
+          }
+        }
+      },
+      "required": ["language", "segments"]
+    },
+    "AccessControl": {
+      "type": "object",
+      "properties": {
+        "visibility": { "type": "string", "enum": ["public", "private", "unlisted", "restricted"] },
+        "password": { "type": "string" },
+        "allowedUsers": { "type": "array", "items": { "type": "string" } },
+        "allowedGroups": { "type": "array", "items": { "type": "string" } },
+        "expiresAt": { "type": "string", "format": "date-time" }
+      }
+    }
+  },
+  "properties": {
+    "id": { "type": "string", "format": "uuid" },
+    "type": { "type": "string", "enum": ["image", "video", "audio", "document", "archive"] },
+    "status": { "type": "string", "enum": ["processing", "ready", "error", "deleted"] },
+    "originalFilename": { "type": "string" },
+    "mimeType": { "type": "string" },
+    "fileSize": { "type": "integer" },
+    "checksum": { "type": "string" },
+    "variants": { "type": "array", "items": { "$ref": "#/definitions/MediaVariant" } },
+    "metadata": { "$ref": "#/definitions/MediaMetadata" },
+    "transcripts": { "type": "array", "items": { "$ref": "#/definitions/Transcript" } },
+    "tags": { "type": "array", "items": { "type": "string" } },
+    "collections": { "type": "array", "items": { "type": "string" } },
+    "accessControl": { "$ref": "#/definitions/AccessControl" },
+    "analytics": {
+      "type": "object",
+      "properties": {
+        "views": { "type": "integer" },
+        "downloads": { "type": "integer" },
+        "shares": { "type": "integer" }
+      }
+    },
+    "ownerId": { "type": "string" },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" }
+  },
+  "required": ["id", "type", "status", "mimeType", "variants"]
+}

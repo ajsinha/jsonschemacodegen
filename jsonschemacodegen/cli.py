@@ -1,0 +1,420 @@
+"""
+
+Copyright © 2025-2030, All Rights Reserved
+Ashutosh Sinha
+Email: ajsinha@gmail.com
+
+LEGAL NOTICE:
+This software is proprietary and confidential. Unauthorized copying,
+distribution, modification, or use is strictly prohibited without
+explicit written permission from the copyright holder.
+
+Patent Pending: Certain implementations may be subject to patent applications.
+
+Command Line Interface for JsonSchemaCodeGen.
+
+Usage:
+    jsonschemacodegen generate --schema schema.json --output models.py
+    jsonschemacodegen sample --schema schema.json --count 5
+    jsonschemacodegen validate --schema schema.json --data data.json
+"""
+
+import argparse
+import json
+import sys
+from pathlib import Path
+from typing import Optional
+
+from .core.schema_processor import SchemaProcessor
+from .core.validator import SchemaValidator
+from .generators.sample_generator import SampleGenerator
+from .generators.code_generator import CodeGenerator
+from .generators.pydantic_generator import PydanticGenerator
+
+
+def create_parser() -> argparse.ArgumentParser:
+    """Create the argument parser."""
+    parser = argparse.ArgumentParser(
+        prog="jsonschemacodegen",
+        description="Generate Python code and sample data from JSON Schema",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  Generate Python dataclasses:
+    jsonschemacodegen generate -s schema.json -o models.py
+    
+  Generate Pydantic models:
+    jsonschemacodegen generate -s schema.json -o models.py --style pydantic
+    
+  Generate sample JSON data:
+    jsonschemacodegen sample -s schema.json -c 10 -o samples.json
+    
+  Validate a schema:
+    jsonschemacodegen validate -s schema.json
+    
+  Validate data against schema:
+    jsonschemacodegen validate -s schema.json -d data.json
+    
+  Analyze schema complexity:
+    jsonschemacodegen info -s schema.json
+""",
+    )
+    
+    parser.add_argument(
+        "--version",
+        action="version",
+        version="%(prog)s 1.0.0",
+    )
+    
+    subparsers = parser.add_subparsers(dest="command", help="Command to run")
+    
+    # Generate command
+    gen_parser = subparsers.add_parser(
+        "generate",
+        help="Generate Python code from JSON Schema",
+    )
+    gen_parser.add_argument(
+        "-s", "--schema",
+        required=True,
+        help="Path to JSON Schema file",
+    )
+    gen_parser.add_argument(
+        "-o", "--output",
+        default="generated_models.py",
+        help="Output file path (default: generated_models.py)",
+    )
+    gen_parser.add_argument(
+        "--style",
+        choices=["dataclass", "pydantic"],
+        default="dataclass",
+        help="Code style to generate (default: dataclass)",
+    )
+    gen_parser.add_argument(
+        "--class-name",
+        default="Root",
+        help="Name for the root class (default: Root)",
+    )
+    gen_parser.add_argument(
+        "--no-validators",
+        action="store_true",
+        help="Don't include validation methods",
+    )
+    
+    # Sample command
+    sample_parser = subparsers.add_parser(
+        "sample",
+        help="Generate sample JSON data from schema",
+    )
+    sample_parser.add_argument(
+        "-s", "--schema",
+        required=True,
+        help="Path to JSON Schema file",
+    )
+    sample_parser.add_argument(
+        "-o", "--output",
+        help="Output file (default: stdout)",
+    )
+    sample_parser.add_argument(
+        "-c", "--count",
+        type=int,
+        default=1,
+        help="Number of samples to generate (default: 1)",
+    )
+    sample_parser.add_argument(
+        "--no-faker",
+        action="store_true",
+        help="Don't use Faker for realistic data",
+    )
+    sample_parser.add_argument(
+        "--seed",
+        type=int,
+        help="Random seed for reproducibility",
+    )
+    
+    # Validate command
+    val_parser = subparsers.add_parser(
+        "validate",
+        help="Validate schema or data against schema",
+    )
+    val_parser.add_argument(
+        "-s", "--schema",
+        required=True,
+        help="Path to JSON Schema file",
+    )
+    val_parser.add_argument(
+        "-d", "--data",
+        help="Path to data file to validate (optional)",
+    )
+    val_parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="Treat warnings as errors",
+    )
+    
+    # Info command
+    info_parser = subparsers.add_parser(
+        "info",
+        help="Show schema information and complexity",
+    )
+    info_parser.add_argument(
+        "-s", "--schema",
+        required=True,
+        help="Path to JSON Schema file",
+    )
+    info_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Output as JSON",
+    )
+    
+    # Convert command
+    conv_parser = subparsers.add_parser(
+        "convert",
+        help="Convert between schema formats",
+    )
+    conv_parser.add_argument(
+        "-s", "--schema",
+        required=True,
+        help="Path to JSON Schema file",
+    )
+    conv_parser.add_argument(
+        "-o", "--output",
+        required=True,
+        help="Output file path",
+    )
+    conv_parser.add_argument(
+        "--format",
+        choices=["json", "yaml"],
+        default="json",
+        help="Output format (default: json)",
+    )
+    
+    return parser
+
+
+def cmd_generate(args) -> int:
+    """Handle generate command."""
+    try:
+        # Load schema
+        with open(args.schema, "r", encoding="utf-8") as f:
+            schema = json.load(f)
+        
+        # Generate code
+        if args.style == "pydantic":
+            generator = PydanticGenerator(
+                schema,
+                root_class_name=args.class_name,
+            )
+        else:
+            generator = CodeGenerator(
+                schema,
+                root_class_name=args.class_name,
+                include_validators=not args.no_validators,
+            )
+        
+        code = generator.generate()
+        
+        # Write output
+        output_path = Path(args.output)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        with open(output_path, "w", encoding="utf-8") as f:
+            f.write(code)
+        
+        print(f"✓ Generated code written to {args.output}")
+        return 0
+        
+    except Exception as e:
+        print(f"✗ Error: {e}", file=sys.stderr)
+        return 1
+
+
+def cmd_sample(args) -> int:
+    """Handle sample command."""
+    try:
+        # Load schema
+        with open(args.schema, "r", encoding="utf-8") as f:
+            schema = json.load(f)
+        
+        # Create processor and generate samples
+        processor = SchemaProcessor(schema)
+        samples = processor.generate_samples(
+            count=args.count,
+            use_faker=not args.no_faker,
+        )
+        
+        # Format output
+        if args.count == 1:
+            output = json.dumps(samples, indent=2, default=str)
+        else:
+            output = json.dumps(samples, indent=2, default=str)
+        
+        # Write output
+        if args.output:
+            with open(args.output, "w", encoding="utf-8") as f:
+                f.write(output)
+            print(f"✓ Generated {args.count} sample(s) to {args.output}")
+        else:
+            print(output)
+        
+        return 0
+        
+    except Exception as e:
+        print(f"✗ Error: {e}", file=sys.stderr)
+        return 1
+
+
+def cmd_validate(args) -> int:
+    """Handle validate command."""
+    try:
+        # Load schema
+        with open(args.schema, "r", encoding="utf-8") as f:
+            schema = json.load(f)
+        
+        validator = SchemaValidator(strict_mode=args.strict)
+        
+        # Validate schema itself
+        schema_result = validator.validate_schema(schema)
+        
+        print("Schema Validation:")
+        if schema_result.is_valid:
+            print("  ✓ Schema is valid")
+        else:
+            print("  ✗ Schema has errors:")
+            for issue in schema_result.errors:
+                print(f"    - {issue.path}: {issue.message}")
+        
+        for warning in schema_result.warnings:
+            print(f"  ⚠ Warning at {warning.path}: {warning.message}")
+        
+        # Validate data if provided
+        if args.data:
+            with open(args.data, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            
+            data_result = validator.validate_data(data, schema)
+            
+            print("\nData Validation:")
+            if data_result.is_valid:
+                print("  ✓ Data is valid")
+            else:
+                print("  ✗ Data has errors:")
+                for issue in data_result.errors:
+                    print(f"    - {issue.path}: {issue.message}")
+            
+            return 0 if data_result.is_valid else 1
+        
+        return 0 if schema_result.is_valid else 1
+        
+    except Exception as e:
+        print(f"✗ Error: {e}", file=sys.stderr)
+        return 1
+
+
+def cmd_info(args) -> int:
+    """Handle info command."""
+    try:
+        # Load schema
+        with open(args.schema, "r", encoding="utf-8") as f:
+            schema = json.load(f)
+        
+        from .utils.json_utils import get_schema_complexity, extract_definitions, find_all_refs
+        
+        metrics = get_schema_complexity(schema)
+        definitions = extract_definitions(schema)
+        refs = find_all_refs(schema)
+        
+        info = {
+            "title": schema.get("title", "Untitled"),
+            "description": schema.get("description", "No description"),
+            "type": schema.get("type", "unknown"),
+            "complexity": metrics,
+            "definitions": list(definitions.keys()),
+            "references": list(refs),
+        }
+        
+        if args.json:
+            print(json.dumps(info, indent=2))
+        else:
+            print(f"Schema: {info['title']}")
+            print(f"Description: {info['description']}")
+            print(f"Type: {info['type']}")
+            print()
+            print("Complexity Metrics:")
+            for key, value in metrics.items():
+                print(f"  {key.replace('_', ' ').title()}: {value}")
+            print()
+            if definitions:
+                print(f"Definitions ({len(definitions)}):")
+                for name in definitions:
+                    print(f"  - {name}")
+            print()
+            if refs:
+                print(f"References ({len(refs)}):")
+                for ref in refs:
+                    print(f"  - {ref}")
+        
+        return 0
+        
+    except Exception as e:
+        print(f"✗ Error: {e}", file=sys.stderr)
+        return 1
+
+
+def cmd_convert(args) -> int:
+    """Handle convert command."""
+    try:
+        # Load schema
+        with open(args.schema, "r", encoding="utf-8") as f:
+            schema = json.load(f)
+        
+        output_path = Path(args.output)
+        
+        if args.format == "yaml":
+            try:
+                import yaml
+                with open(output_path, "w", encoding="utf-8") as f:
+                    yaml.dump(schema, f, default_flow_style=False, sort_keys=False)
+            except ImportError:
+                print("✗ Error: PyYAML is required for YAML output", file=sys.stderr)
+                print("  Install with: pip install pyyaml", file=sys.stderr)
+                return 1
+        else:
+            with open(output_path, "w", encoding="utf-8") as f:
+                json.dump(schema, f, indent=2)
+        
+        print(f"✓ Converted schema written to {args.output}")
+        return 0
+        
+    except Exception as e:
+        print(f"✗ Error: {e}", file=sys.stderr)
+        return 1
+
+
+def main(argv: Optional[list] = None) -> int:
+    """Main entry point."""
+    parser = create_parser()
+    args = parser.parse_args(argv)
+    
+    if not args.command:
+        parser.print_help()
+        return 0
+    
+    commands = {
+        "generate": cmd_generate,
+        "sample": cmd_sample,
+        "validate": cmd_validate,
+        "info": cmd_info,
+        "convert": cmd_convert,
+    }
+    
+    handler = commands.get(args.command)
+    if handler:
+        return handler(args)
+    
+    parser.print_help()
+    return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

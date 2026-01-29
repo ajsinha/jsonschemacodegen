@@ -1,0 +1,118 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "ml_model.json",
+  "title": "MLModel",
+  "description": "Machine learning model registry entry",
+  "type": "object",
+  "definitions": {
+    "ModelVersion": {
+      "type": "object",
+      "properties": {
+        "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+        "status": { "type": "string", "enum": ["staging", "production", "archived", "failed"] },
+        "artifacts": { "type": "array", "items": { "$ref": "#/definitions/Artifact" } },
+        "metrics": { "$ref": "#/definitions/Metrics" },
+        "parameters": { "type": "object", "additionalProperties": true },
+        "trainingData": { "$ref": "#/definitions/Dataset" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "promotedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["version", "status"]
+    },
+    "Artifact": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "type": { "type": "string", "enum": ["model", "weights", "config", "tokenizer", "preprocessor"] },
+        "path": { "type": "string" },
+        "format": { "type": "string" },
+        "size": { "type": "integer" },
+        "checksum": { "type": "string" }
+      },
+      "required": ["name", "type", "path"]
+    },
+    "Metrics": {
+      "type": "object",
+      "properties": {
+        "accuracy": { "type": "number", "minimum": 0, "maximum": 1 },
+        "precision": { "type": "number", "minimum": 0, "maximum": 1 },
+        "recall": { "type": "number", "minimum": 0, "maximum": 1 },
+        "f1Score": { "type": "number", "minimum": 0, "maximum": 1 },
+        "auc": { "type": "number", "minimum": 0, "maximum": 1 },
+        "loss": { "type": "number" },
+        "mse": { "type": "number" },
+        "mae": { "type": "number" },
+        "custom": { "type": "object", "additionalProperties": { "type": "number" } }
+      }
+    },
+    "Dataset": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "version": { "type": "string" },
+        "path": { "type": "string" },
+        "size": { "type": "integer" },
+        "samples": { "type": "integer" },
+        "features": { "type": "array", "items": { "$ref": "#/definitions/Feature" } },
+        "splits": {
+          "type": "object",
+          "properties": {
+            "train": { "type": "number" },
+            "validation": { "type": "number" },
+            "test": { "type": "number" }
+          }
+        }
+      },
+      "required": ["name"]
+    },
+    "Feature": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "type": { "type": "string", "enum": ["numeric", "categorical", "text", "image", "embedding"] },
+        "shape": { "type": "array", "items": { "type": "integer" } },
+        "nullable": { "type": "boolean" },
+        "statistics": { "type": "object", "additionalProperties": true }
+      },
+      "required": ["name", "type"]
+    },
+    "Deployment": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "environment": { "type": "string", "enum": ["development", "staging", "production"] },
+        "endpoint": { "type": "string", "format": "uri" },
+        "replicas": { "type": "integer", "minimum": 1 },
+        "resources": {
+          "type": "object",
+          "properties": {
+            "cpu": { "type": "string" },
+            "memory": { "type": "string" },
+            "gpu": { "type": "string" }
+          }
+        },
+        "status": { "type": "string", "enum": ["deploying", "running", "failed", "stopped"] },
+        "deployedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "environment", "status"]
+    }
+  },
+  "properties": {
+    "id": { "type": "string", "format": "uuid" },
+    "name": { "type": "string" },
+    "description": { "type": "string" },
+    "type": { "type": "string", "enum": ["classification", "regression", "clustering", "nlp", "cv", "recommendation", "timeseries"] },
+    "framework": { "type": "string", "enum": ["pytorch", "tensorflow", "sklearn", "xgboost", "huggingface", "onnx"] },
+    "owner": { "type": "string" },
+    "team": { "type": "string" },
+    "tags": { "type": "array", "items": { "type": "string" } },
+    "versions": { "type": "array", "items": { "$ref": "#/definitions/ModelVersion" } },
+    "currentVersion": { "type": "string" },
+    "deployments": { "type": "array", "items": { "$ref": "#/definitions/Deployment" } },
+    "inputSchema": { "type": "object" },
+    "outputSchema": { "type": "object" },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" }
+  },
+  "required": ["id", "name", "type", "framework"]
+}

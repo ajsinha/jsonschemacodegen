@@ -1,0 +1,93 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "graphql_schema.json",
+  "title": "GraphQLSchema",
+  "description": "GraphQL schema definition",
+  "type": "object",
+  "definitions": {
+    "TypeDef": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "kind": { "type": "string", "enum": ["OBJECT", "INPUT", "INTERFACE", "UNION", "ENUM", "SCALAR"] },
+        "description": { "type": "string" },
+        "fields": { "type": "array", "items": { "$ref": "#/definitions/FieldDef" } },
+        "interfaces": { "type": "array", "items": { "type": "string" } },
+        "possibleTypes": { "type": "array", "items": { "type": "string" } },
+        "enumValues": { "type": "array", "items": { "$ref": "#/definitions/EnumValue" } },
+        "directives": { "type": "array", "items": { "$ref": "#/definitions/Directive" } }
+      },
+      "required": ["name", "kind"]
+    },
+    "FieldDef": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "type": { "$ref": "#/definitions/TypeRef" },
+        "args": { "type": "array", "items": { "$ref": "#/definitions/Argument" } },
+        "isDeprecated": { "type": "boolean" },
+        "deprecationReason": { "type": "string" },
+        "directives": { "type": "array", "items": { "$ref": "#/definitions/Directive" } }
+      },
+      "required": ["name", "type"]
+    },
+    "TypeRef": {
+      "type": "object",
+      "properties": {
+        "kind": { "type": "string", "enum": ["NAMED", "LIST", "NON_NULL"] },
+        "name": { "type": "string" },
+        "ofType": { "$ref": "#/definitions/TypeRef" }
+      },
+      "required": ["kind"]
+    },
+    "Argument": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "type": { "$ref": "#/definitions/TypeRef" },
+        "defaultValue": {}
+      },
+      "required": ["name", "type"]
+    },
+    "EnumValue": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "isDeprecated": { "type": "boolean" },
+        "deprecationReason": { "type": "string" }
+      },
+      "required": ["name"]
+    },
+    "Directive": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "args": { "type": "object", "additionalProperties": true }
+      },
+      "required": ["name"]
+    }
+  },
+  "properties": {
+    "types": { "type": "array", "items": { "$ref": "#/definitions/TypeDef" } },
+    "queryType": { "type": "string" },
+    "mutationType": { "type": "string" },
+    "subscriptionType": { "type": "string" },
+    "directives": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "locations": { "type": "array", "items": { "type": "string" } },
+          "args": { "type": "array", "items": { "$ref": "#/definitions/Argument" } }
+        },
+        "required": ["name", "locations"]
+      }
+    }
+  },
+  "required": ["types", "queryType"]
+}

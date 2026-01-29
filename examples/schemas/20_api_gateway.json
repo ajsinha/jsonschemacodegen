@@ -1,0 +1,167 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "api_gateway.json",
+  "title": "APIGatewayConfig",
+  "description": "API Gateway configuration with routes and policies",
+  "type": "object",
+  "definitions": {
+    "Route": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "path": { "type": "string", "pattern": "^/.*" },
+        "methods": { "type": "array", "items": { "type": "string", "enum": ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"] } },
+        "backend": { "$ref": "#/definitions/Backend" },
+        "authentication": { "$ref": "#/definitions/Authentication" },
+        "rateLimit": { "$ref": "#/definitions/RateLimit" },
+        "cache": { "$ref": "#/definitions/CachePolicy" },
+        "transform": { "$ref": "#/definitions/Transform" },
+        "cors": { "$ref": "#/definitions/CORS" },
+        "enabled": { "type": "boolean", "default": true }
+      },
+      "required": ["id", "path", "methods", "backend"]
+    },
+    "Backend": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["http", "lambda", "mock", "grpc"] },
+        "url": { "type": "string", "format": "uri" },
+        "timeout": { "type": "integer", "minimum": 0 },
+        "retries": { "type": "integer", "minimum": 0 },
+        "circuitBreaker": { "$ref": "#/definitions/CircuitBreaker" },
+        "loadBalancer": { "$ref": "#/definitions/LoadBalancer" }
+      },
+      "required": ["type"]
+    },
+    "CircuitBreaker": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "threshold": { "type": "integer" },
+        "timeout": { "type": "integer" },
+        "halfOpenRequests": { "type": "integer" }
+      }
+    },
+    "LoadBalancer": {
+      "type": "object",
+      "properties": {
+        "strategy": { "type": "string", "enum": ["round_robin", "least_connections", "random", "weighted"] },
+        "targets": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "url": { "type": "string", "format": "uri" },
+              "weight": { "type": "integer", "minimum": 1 },
+              "healthCheck": { "type": "string" }
+            },
+            "required": ["url"]
+          }
+        }
+      }
+    },
+    "Authentication": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["none", "api_key", "jwt", "oauth2", "basic", "custom"] },
+        "required": { "type": "boolean" },
+        "config": {
+          "type": "object",
+          "properties": {
+            "header": { "type": "string" },
+            "query": { "type": "string" },
+            "issuer": { "type": "string" },
+            "audience": { "type": "string" },
+            "jwksUri": { "type": "string", "format": "uri" }
+          }
+        }
+      },
+      "required": ["type"]
+    },
+    "RateLimit": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "requests": { "type": "integer", "minimum": 1 },
+        "period": { "type": "string", "enum": ["second", "minute", "hour", "day"] },
+        "by": { "type": "string", "enum": ["ip", "api_key", "user", "global"] },
+        "burst": { "type": "integer" }
+      }
+    },
+    "CachePolicy": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "ttl": { "type": "integer" },
+        "varyBy": { "type": "array", "items": { "type": "string" } },
+        "invalidateOn": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "Transform": {
+      "type": "object",
+      "properties": {
+        "request": { "$ref": "#/definitions/TransformRules" },
+        "response": { "$ref": "#/definitions/TransformRules" }
+      }
+    },
+    "TransformRules": {
+      "type": "object",
+      "properties": {
+        "headers": {
+          "type": "object",
+          "properties": {
+            "add": { "type": "object", "additionalProperties": { "type": "string" } },
+            "remove": { "type": "array", "items": { "type": "string" } },
+            "rename": { "type": "object", "additionalProperties": { "type": "string" } }
+          }
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "template": { "type": "string" },
+            "mapping": { "type": "object", "additionalProperties": { "type": "string" } }
+          }
+        }
+      }
+    },
+    "CORS": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "allowOrigins": { "type": "array", "items": { "type": "string" } },
+        "allowMethods": { "type": "array", "items": { "type": "string" } },
+        "allowHeaders": { "type": "array", "items": { "type": "string" } },
+        "exposeHeaders": { "type": "array", "items": { "type": "string" } },
+        "maxAge": { "type": "integer" },
+        "allowCredentials": { "type": "boolean" }
+      }
+    }
+  },
+  "properties": {
+    "id": { "type": "string" },
+    "name": { "type": "string" },
+    "version": { "type": "string" },
+    "basePath": { "type": "string" },
+    "routes": { "type": "array", "items": { "$ref": "#/definitions/Route" } },
+    "globalRateLimit": { "$ref": "#/definitions/RateLimit" },
+    "globalCors": { "$ref": "#/definitions/CORS" },
+    "logging": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "level": { "type": "string", "enum": ["debug", "info", "warn", "error"] },
+        "includeBody": { "type": "boolean" }
+      }
+    },
+    "monitoring": {
+      "type": "object",
+      "properties": {
+        "metrics": { "type": "boolean" },
+        "tracing": { "type": "boolean" },
+        "healthCheck": { "type": "string" }
+      }
+    }
+  },
+  "required": ["id", "name", "routes"]
+}

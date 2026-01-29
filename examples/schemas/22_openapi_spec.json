@@ -1,0 +1,175 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "openapi_spec.json",
+  "title": "OpenAPISpec",
+  "description": "Simplified OpenAPI 3.0 specification",
+  "type": "object",
+  "definitions": {
+    "Info": {
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "version": { "type": "string" },
+        "termsOfService": { "type": "string", "format": "uri" },
+        "contact": { "$ref": "#/definitions/Contact" },
+        "license": { "$ref": "#/definitions/License" }
+      },
+      "required": ["title", "version"]
+    },
+    "Contact": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "url": { "type": "string", "format": "uri" },
+        "email": { "type": "string", "format": "email" }
+      }
+    },
+    "License": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "url": { "type": "string", "format": "uri" }
+      },
+      "required": ["name"]
+    },
+    "Server": {
+      "type": "object",
+      "properties": {
+        "url": { "type": "string" },
+        "description": { "type": "string" },
+        "variables": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "enum": { "type": "array", "items": { "type": "string" } },
+              "default": { "type": "string" },
+              "description": { "type": "string" }
+            },
+            "required": ["default"]
+          }
+        }
+      },
+      "required": ["url"]
+    },
+    "PathItem": {
+      "type": "object",
+      "properties": {
+        "summary": { "type": "string" },
+        "description": { "type": "string" },
+        "get": { "$ref": "#/definitions/Operation" },
+        "post": { "$ref": "#/definitions/Operation" },
+        "put": { "$ref": "#/definitions/Operation" },
+        "patch": { "$ref": "#/definitions/Operation" },
+        "delete": { "$ref": "#/definitions/Operation" },
+        "parameters": { "type": "array", "items": { "$ref": "#/definitions/Parameter" } }
+      }
+    },
+    "Operation": {
+      "type": "object",
+      "properties": {
+        "operationId": { "type": "string" },
+        "summary": { "type": "string" },
+        "description": { "type": "string" },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "parameters": { "type": "array", "items": { "$ref": "#/definitions/Parameter" } },
+        "requestBody": { "$ref": "#/definitions/RequestBody" },
+        "responses": { "type": "object", "additionalProperties": { "$ref": "#/definitions/Response" } },
+        "security": { "type": "array", "items": { "type": "object" } },
+        "deprecated": { "type": "boolean" }
+      },
+      "required": ["responses"]
+    },
+    "Parameter": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "in": { "type": "string", "enum": ["query", "header", "path", "cookie"] },
+        "description": { "type": "string" },
+        "required": { "type": "boolean" },
+        "schema": { "type": "object" },
+        "style": { "type": "string" },
+        "explode": { "type": "boolean" }
+      },
+      "required": ["name", "in"]
+    },
+    "RequestBody": {
+      "type": "object",
+      "properties": {
+        "description": { "type": "string" },
+        "required": { "type": "boolean" },
+        "content": { "$ref": "#/definitions/MediaTypes" }
+      },
+      "required": ["content"]
+    },
+    "Response": {
+      "type": "object",
+      "properties": {
+        "description": { "type": "string" },
+        "content": { "$ref": "#/definitions/MediaTypes" },
+        "headers": { "type": "object" }
+      },
+      "required": ["description"]
+    },
+    "MediaTypes": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "schema": { "type": "object" },
+          "example": {},
+          "examples": { "type": "object" }
+        }
+      }
+    },
+    "SecurityScheme": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["apiKey", "http", "oauth2", "openIdConnect"] },
+        "description": { "type": "string" },
+        "name": { "type": "string" },
+        "in": { "type": "string", "enum": ["query", "header", "cookie"] },
+        "scheme": { "type": "string" },
+        "bearerFormat": { "type": "string" },
+        "flows": { "type": "object" },
+        "openIdConnectUrl": { "type": "string", "format": "uri" }
+      },
+      "required": ["type"]
+    },
+    "Tag": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "externalDocs": {
+          "type": "object",
+          "properties": {
+            "url": { "type": "string", "format": "uri" },
+            "description": { "type": "string" }
+          },
+          "required": ["url"]
+        }
+      },
+      "required": ["name"]
+    }
+  },
+  "properties": {
+    "openapi": { "type": "string", "pattern": "^3\\.\\d+\\.\\d+$" },
+    "info": { "$ref": "#/definitions/Info" },
+    "servers": { "type": "array", "items": { "$ref": "#/definitions/Server" } },
+    "paths": { "type": "object", "additionalProperties": { "$ref": "#/definitions/PathItem" } },
+    "components": {
+      "type": "object",
+      "properties": {
+        "schemas": { "type": "object", "additionalProperties": { "type": "object" } },
+        "responses": { "type": "object", "additionalProperties": { "$ref": "#/definitions/Response" } },
+        "parameters": { "type": "object", "additionalProperties": { "$ref": "#/definitions/Parameter" } },
+        "securitySchemes": { "type": "object", "additionalProperties": { "$ref": "#/definitions/SecurityScheme" } }
+      }
+    },
+    "security": { "type": "array", "items": { "type": "object" } },
+    "tags": { "type": "array", "items": { "$ref": "#/definitions/Tag" } }
+  },
+  "required": ["openapi", "info", "paths"]
+}

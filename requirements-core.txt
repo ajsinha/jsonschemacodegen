@@ -1,0 +1,16 @@
+# JsonSchemaCodeGen v1.0.0 - Core Requirements
+#
+# Copyright © 2025-2030, All Rights Reserved
+# Ashutosh Sinha
+# Email: ajsinha@gmail.com
+#
+# Core package has NO required dependencies.
+# Install with: pip install .
+#
+# This file is intentionally empty as the core
+# functionality works with Python standard library only.
+#
+# For optional features, see:
+#   - requirements.txt (all dependencies)
+#   - requirements-faker.txt (sample data)
+#   - requirements-dev.txt (development)

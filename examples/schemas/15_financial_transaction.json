@@ -1,0 +1,93 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "financial_transaction.json",
+  "title": "FinancialTransaction",
+  "description": "Financial transaction with compliance and audit trail",
+  "type": "object",
+  "definitions": {
+    "Money": {
+      "type": "object",
+      "properties": {
+        "amount": { "type": "string", "pattern": "^-?\\d+\\.\\d{2}$" },
+        "currency": { "type": "string", "pattern": "^[A-Z]{3}$" }
+      },
+      "required": ["amount", "currency"]
+    },
+    "Account": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string", "enum": ["checking", "savings", "credit", "investment", "loan"] },
+        "number": { "type": "string" },
+        "routingNumber": { "type": "string" },
+        "institution": { "$ref": "#/definitions/Institution" },
+        "holder": { "$ref": "#/definitions/AccountHolder" }
+      },
+      "required": ["id", "type"]
+    },
+    "Institution": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "bic": { "type": "string", "pattern": "^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$" },
+        "country": { "type": "string" }
+      },
+      "required": ["name"]
+    },
+    "AccountHolder": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "type": { "type": "string", "enum": ["individual", "business"] },
+        "taxId": { "type": "string" },
+        "address": { "type": "string" }
+      },
+      "required": ["name", "type"]
+    },
+    "ComplianceCheck": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["aml", "kyc", "sanctions", "fraud"] },
+        "status": { "type": "string", "enum": ["pending", "passed", "failed", "review"] },
+        "score": { "type": "number", "minimum": 0, "maximum": 100 },
+        "flags": { "type": "array", "items": { "type": "string" } },
+        "checkedAt": { "type": "string", "format": "date-time" },
+        "provider": { "type": "string" }
+      },
+      "required": ["type", "status", "checkedAt"]
+    },
+    "AuditEntry": {
+      "type": "object",
+      "properties": {
+        "timestamp": { "type": "string", "format": "date-time" },
+        "action": { "type": "string" },
+        "actor": { "type": "string" },
+        "details": { "type": "object", "additionalProperties": true },
+        "ipAddress": { "type": "string" }
+      },
+      "required": ["timestamp", "action"]
+    }
+  },
+  "properties": {
+    "id": { "type": "string", "format": "uuid" },
+    "referenceNumber": { "type": "string" },
+    "type": { "type": "string", "enum": ["transfer", "payment", "deposit", "withdrawal", "fee", "refund"] },
+    "status": { "type": "string", "enum": ["pending", "processing", "completed", "failed", "cancelled", "reversed"] },
+    "source": { "$ref": "#/definitions/Account" },
+    "destination": { "$ref": "#/definitions/Account" },
+    "amount": { "$ref": "#/definitions/Money" },
+    "fees": { "type": "array", "items": { "$ref": "#/definitions/Money" } },
+    "exchangeRate": { "type": "number" },
+    "description": { "type": "string" },
+    "memo": { "type": "string" },
+    "category": { "type": "string" },
+    "compliance": { "type": "array", "items": { "$ref": "#/definitions/ComplianceCheck" } },
+    "auditTrail": { "type": "array", "items": { "$ref": "#/definitions/AuditEntry" } },
+    "metadata": { "type": "object", "additionalProperties": true },
+    "scheduledDate": { "type": "string", "format": "date" },
+    "executedAt": { "type": "string", "format": "date-time" },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" }
+  },
+  "required": ["id", "type", "status", "source", "amount", "createdAt"]
+}

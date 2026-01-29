@@ -1,0 +1,136 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "game_entity.json",
+  "title": "GameEntity",
+  "description": "Game entity with components and behaviors",
+  "type": "object",
+  "definitions": {
+    "Transform": {
+      "type": "object",
+      "properties": {
+        "position": { "$ref": "#/definitions/Vector3" },
+        "rotation": { "$ref": "#/definitions/Quaternion" },
+        "scale": { "$ref": "#/definitions/Vector3" }
+      }
+    },
+    "Vector3": {
+      "type": "object",
+      "properties": {
+        "x": { "type": "number", "default": 0 },
+        "y": { "type": "number", "default": 0 },
+        "z": { "type": "number", "default": 0 }
+      },
+      "required": ["x", "y", "z"]
+    },
+    "Quaternion": {
+      "type": "object",
+      "properties": {
+        "x": { "type": "number", "default": 0 },
+        "y": { "type": "number", "default": 0 },
+        "z": { "type": "number", "default": 0 },
+        "w": { "type": "number", "default": 1 }
+      },
+      "required": ["x", "y", "z", "w"]
+    },
+    "Component": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string" },
+        "enabled": { "type": "boolean", "default": true },
+        "properties": { "type": "object", "additionalProperties": true }
+      },
+      "required": ["type"]
+    },
+    "Collider": {
+      "allOf": [
+        { "$ref": "#/definitions/Component" },
+        {
+          "type": "object",
+          "properties": {
+            "shape": { "type": "string", "enum": ["box", "sphere", "capsule", "mesh"] },
+            "isTrigger": { "type": "boolean" },
+            "center": { "$ref": "#/definitions/Vector3" },
+            "size": { "$ref": "#/definitions/Vector3" },
+            "radius": { "type": "number" }
+          }
+        }
+      ]
+    },
+    "RigidBody": {
+      "allOf": [
+        { "$ref": "#/definitions/Component" },
+        {
+          "type": "object",
+          "properties": {
+            "mass": { "type": "number", "minimum": 0 },
+            "drag": { "type": "number", "minimum": 0 },
+            "angularDrag": { "type": "number", "minimum": 0 },
+            "useGravity": { "type": "boolean" },
+            "isKinematic": { "type": "boolean" },
+            "constraints": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      ]
+    },
+    "Renderer": {
+      "allOf": [
+        { "$ref": "#/definitions/Component" },
+        {
+          "type": "object",
+          "properties": {
+            "mesh": { "type": "string" },
+            "materials": { "type": "array", "items": { "type": "string" } },
+            "castShadows": { "type": "boolean" },
+            "receiveShadows": { "type": "boolean" }
+          }
+        }
+      ]
+    },
+    "Script": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "class": { "type": "string" },
+        "parameters": { "type": "object", "additionalProperties": true }
+      },
+      "required": ["name", "class"]
+    },
+    "Animation": {
+      "type": "object",
+      "properties": {
+        "controller": { "type": "string" },
+        "clips": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "path": { "type": "string" },
+              "loop": { "type": "boolean" },
+              "speed": { "type": "number" }
+            },
+            "required": ["name", "path"]
+          }
+        }
+      }
+    }
+  },
+  "properties": {
+    "id": { "type": "string", "format": "uuid" },
+    "name": { "type": "string" },
+    "tag": { "type": "string" },
+    "layer": { "type": "integer", "minimum": 0, "maximum": 31 },
+    "active": { "type": "boolean", "default": true },
+    "static": { "type": "boolean", "default": false },
+    "transform": { "$ref": "#/definitions/Transform" },
+    "components": { "type": "array", "items": { "$ref": "#/definitions/Component" } },
+    "colliders": { "type": "array", "items": { "$ref": "#/definitions/Collider" } },
+    "rigidBody": { "$ref": "#/definitions/RigidBody" },
+    "renderer": { "$ref": "#/definitions/Renderer" },
+    "scripts": { "type": "array", "items": { "$ref": "#/definitions/Script" } },
+    "animation": { "$ref": "#/definitions/Animation" },
+    "children": { "type": "array", "items": { "$ref": "#" } },
+    "prefab": { "type": "string" }
+  },
+  "required": ["id", "name", "transform"]
+}

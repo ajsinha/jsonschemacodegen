@@ -1,0 +1,128 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "survey.json",
+  "title": "Survey",
+  "description": "Survey with questions and responses",
+  "type": "object",
+  "definitions": {
+    "Question": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string", "enum": ["text", "textarea", "number", "date", "single_choice", "multiple_choice", "rating", "matrix", "ranking", "file_upload"] },
+        "text": { "type": "string" },
+        "description": { "type": "string" },
+        "required": { "type": "boolean", "default": false },
+        "options": { "type": "array", "items": { "$ref": "#/definitions/QuestionOption" } },
+        "validation": { "$ref": "#/definitions/Validation" },
+        "logic": { "$ref": "#/definitions/QuestionLogic" },
+        "order": { "type": "integer" }
+      },
+      "required": ["id", "type", "text"]
+    },
+    "QuestionOption": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "text": { "type": "string" },
+        "value": {},
+        "image": { "type": "string", "format": "uri" },
+        "isOther": { "type": "boolean" }
+      },
+      "required": ["id", "text"]
+    },
+    "Validation": {
+      "type": "object",
+      "properties": {
+        "minLength": { "type": "integer" },
+        "maxLength": { "type": "integer" },
+        "min": { "type": "number" },
+        "max": { "type": "number" },
+        "pattern": { "type": "string" },
+        "minSelections": { "type": "integer" },
+        "maxSelections": { "type": "integer" },
+        "errorMessage": { "type": "string" }
+      }
+    },
+    "QuestionLogic": {
+      "type": "object",
+      "properties": {
+        "showIf": {
+          "type": "object",
+          "properties": {
+            "questionId": { "type": "string" },
+            "operator": { "type": "string", "enum": ["equals", "not_equals", "contains", "greater_than", "less_than"] },
+            "value": {}
+          }
+        },
+        "skipTo": { "type": "string" }
+      }
+    },
+    "Section": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "questions": { "type": "array", "items": { "$ref": "#/definitions/Question" } },
+        "order": { "type": "integer" }
+      },
+      "required": ["id", "questions"]
+    },
+    "Response": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "format": "uuid" },
+        "respondentId": { "type": "string" },
+        "answers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "questionId": { "type": "string" },
+              "value": {},
+              "otherText": { "type": "string" },
+              "skipped": { "type": "boolean" }
+            },
+            "required": ["questionId"]
+          }
+        },
+        "startedAt": { "type": "string", "format": "date-time" },
+        "completedAt": { "type": "string", "format": "date-time" },
+        "duration": { "type": "integer" },
+        "metadata": { "type": "object", "additionalProperties": true }
+      },
+      "required": ["id", "answers"]
+    }
+  },
+  "properties": {
+    "id": { "type": "string", "format": "uuid" },
+    "title": { "type": "string" },
+    "description": { "type": "string" },
+    "status": { "type": "string", "enum": ["draft", "active", "paused", "closed", "archived"] },
+    "sections": { "type": "array", "items": { "$ref": "#/definitions/Section" } },
+    "settings": {
+      "type": "object",
+      "properties": {
+        "allowAnonymous": { "type": "boolean" },
+        "oneResponsePerUser": { "type": "boolean" },
+        "showProgressBar": { "type": "boolean" },
+        "randomizeQuestions": { "type": "boolean" },
+        "redirectUrl": { "type": "string", "format": "uri" }
+      }
+    },
+    "schedule": {
+      "type": "object",
+      "properties": {
+        "startDate": { "type": "string", "format": "date-time" },
+        "endDate": { "type": "string", "format": "date-time" },
+        "maxResponses": { "type": "integer" }
+      }
+    },
+    "responses": { "type": "array", "items": { "$ref": "#/definitions/Response" } },
+    "responseCount": { "type": "integer" },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" }
+  },
+  "required": ["id", "title", "status", "sections"]
+}

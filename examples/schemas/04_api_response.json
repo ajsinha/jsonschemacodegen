@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "api_response.json",
+  "title": "APIResponse",
+  "description": "Standard API response wrapper",
+  "type": "object",
+  "definitions": {
+    "Error": {
+      "type": "object",
+      "properties": {
+        "code": { "type": "string" },
+        "message": { "type": "string" },
+        "field": { "type": "string" },
+        "details": { "type": "object", "additionalProperties": true }
+      },
+      "required": ["code", "message"]
+    },
+    "Pagination": {
+      "type": "object",
+      "properties": {
+        "page": { "type": "integer", "minimum": 1 },
+        "perPage": { "type": "integer", "minimum": 1, "maximum": 100 },
+        "totalItems": { "type": "integer", "minimum": 0 },
+        "totalPages": { "type": "integer", "minimum": 0 },
+        "hasNext": { "type": "boolean" },
+        "hasPrev": { "type": "boolean" }
+      },
+      "required": ["page", "perPage", "totalItems", "totalPages"]
+    },
+    "Meta": {
+      "type": "object",
+      "properties": {
+        "requestId": { "type": "string", "format": "uuid" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "version": { "type": "string" },
+        "deprecationWarning": { "type": "string" }
+      },
+      "required": ["requestId", "timestamp"]
+    }
+  },
+  "properties": {
+    "success": { "type": "boolean" },
+    "data": { "type": ["object", "array", "null"] },
+    "errors": { "type": "array", "items": { "$ref": "#/definitions/Error" } },
+    "pagination": { "$ref": "#/definitions/Pagination" },
+    "meta": { "$ref": "#/definitions/Meta" }
+  },
+  "required": ["success", "meta"]
+}

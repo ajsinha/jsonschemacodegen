@@ -1,0 +1,14 @@
+# JsonSchemaCodeGen v1.0.0 - Faker Requirements
+#
+# Copyright © 2025-2030, All Rights Reserved
+# Ashutosh Sinha
+# Email: ajsinha@gmail.com
+#
+# Install with: pip install -r requirements-faker.txt
+#
+# Enables realistic sample data generation with:
+# - Real-looking names, emails, addresses
+# - Format-specific data (UUID, dates, phone numbers)
+# - Locale support for international data
+
+faker>=18.0.0

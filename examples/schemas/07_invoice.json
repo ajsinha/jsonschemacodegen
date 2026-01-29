@@ -1,0 +1,72 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "invoice.json",
+  "title": "Invoice",
+  "description": "Business invoice with line items and tax",
+  "type": "object",
+  "definitions": {
+    "Contact": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "company": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "phone": { "type": "string" },
+        "address": { "$ref": "#/definitions/Address" },
+        "taxId": { "type": "string" }
+      },
+      "required": ["name"]
+    },
+    "Address": {
+      "type": "object",
+      "properties": {
+        "street": { "type": "string" },
+        "city": { "type": "string" },
+        "state": { "type": "string" },
+        "postalCode": { "type": "string" },
+        "country": { "type": "string" }
+      },
+      "required": ["street", "city", "country"]
+    },
+    "InvoiceItem": {
+      "type": "object",
+      "properties": {
+        "description": { "type": "string" },
+        "quantity": { "type": "number", "minimum": 0 },
+        "unitPrice": { "type": "number", "minimum": 0 },
+        "discount": { "type": "number", "minimum": 0, "maximum": 100 },
+        "taxRate": { "type": "number", "minimum": 0 },
+        "amount": { "type": "number" }
+      },
+      "required": ["description", "quantity", "unitPrice"]
+    },
+    "PaymentTerms": {
+      "type": "object",
+      "properties": {
+        "dueDate": { "type": "string", "format": "date" },
+        "lateFee": { "type": "number" },
+        "earlyPaymentDiscount": { "type": "number" },
+        "notes": { "type": "string" }
+      },
+      "required": ["dueDate"]
+    }
+  },
+  "properties": {
+    "id": { "type": "string", "format": "uuid" },
+    "invoiceNumber": { "type": "string" },
+    "status": { "type": "string", "enum": ["draft", "sent", "paid", "overdue", "cancelled"] },
+    "issueDate": { "type": "string", "format": "date" },
+    "from": { "$ref": "#/definitions/Contact" },
+    "to": { "$ref": "#/definitions/Contact" },
+    "items": { "type": "array", "items": { "$ref": "#/definitions/InvoiceItem" }, "minItems": 1 },
+    "subtotal": { "type": "number" },
+    "taxTotal": { "type": "number" },
+    "discountTotal": { "type": "number" },
+    "total": { "type": "number" },
+    "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+    "paymentTerms": { "$ref": "#/definitions/PaymentTerms" },
+    "notes": { "type": "string" },
+    "attachments": { "type": "array", "items": { "type": "string", "format": "uri" } }
+  },
+  "required": ["id", "invoiceNumber", "status", "issueDate", "from", "to", "items", "total", "currency"]
+}

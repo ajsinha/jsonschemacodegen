@@ -1,0 +1,64 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "blog_post.json",
+  "title": "BlogPost",
+  "description": "Blog post with comments and metadata",
+  "type": "object",
+  "definitions": {
+    "Author": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "format": "uuid" },
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "bio": { "type": "string" },
+        "avatar": { "type": "string", "format": "uri" }
+      },
+      "required": ["id", "name"]
+    },
+    "Comment": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "format": "uuid" },
+        "author": { "$ref": "#/definitions/Author" },
+        "content": { "type": "string" },
+        "parentId": { "type": "string", "format": "uuid" },
+        "replies": { "type": "array", "items": { "$ref": "#/definitions/Comment" } },
+        "likes": { "type": "integer", "minimum": 0 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "author", "content", "createdAt"]
+    },
+    "Tag": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "slug": { "type": "string" }
+      },
+      "required": ["id", "name", "slug"]
+    }
+  },
+  "properties": {
+    "id": { "type": "string", "format": "uuid" },
+    "title": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "slug": { "type": "string" },
+    "excerpt": { "type": "string", "maxLength": 500 },
+    "content": { "type": "string" },
+    "contentFormat": { "type": "string", "enum": ["markdown", "html", "plain"] },
+    "featuredImage": { "type": "string", "format": "uri" },
+    "author": { "$ref": "#/definitions/Author" },
+    "coAuthors": { "type": "array", "items": { "$ref": "#/definitions/Author" } },
+    "tags": { "type": "array", "items": { "$ref": "#/definitions/Tag" } },
+    "category": { "type": "string" },
+    "status": { "type": "string", "enum": ["draft", "published", "archived"] },
+    "comments": { "type": "array", "items": { "$ref": "#/definitions/Comment" } },
+    "commentCount": { "type": "integer", "minimum": 0 },
+    "viewCount": { "type": "integer", "minimum": 0 },
+    "likeCount": { "type": "integer", "minimum": 0 },
+    "publishedAt": { "type": "string", "format": "date-time" },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" }
+  },
+  "required": ["id", "title", "slug", "content", "author", "status"]
+}

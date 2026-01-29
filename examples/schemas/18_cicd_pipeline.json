@@ -1,0 +1,161 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "cicd_pipeline.json",
+  "title": "CICDPipeline",
+  "description": "CI/CD pipeline definition",
+  "type": "object",
+  "definitions": {
+    "Stage": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "displayName": { "type": "string" },
+        "dependsOn": { "type": "array", "items": { "type": "string" } },
+        "condition": { "type": "string" },
+        "jobs": { "type": "array", "items": { "$ref": "#/definitions/Job" } },
+        "variables": { "type": "object", "additionalProperties": { "type": "string" } }
+      },
+      "required": ["name", "jobs"]
+    },
+    "Job": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "displayName": { "type": "string" },
+        "pool": { "$ref": "#/definitions/Pool" },
+        "container": { "$ref": "#/definitions/Container" },
+        "steps": { "type": "array", "items": { "$ref": "#/definitions/Step" } },
+        "dependsOn": { "type": "array", "items": { "type": "string" } },
+        "condition": { "type": "string" },
+        "timeoutInMinutes": { "type": "integer" },
+        "continueOnError": { "type": "boolean" },
+        "strategy": { "$ref": "#/definitions/Strategy" }
+      },
+      "required": ["name", "steps"]
+    },
+    "Pool": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "vmImage": { "type": "string" },
+        "demands": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "Container": {
+      "type": "object",
+      "properties": {
+        "image": { "type": "string" },
+        "options": { "type": "string" },
+        "env": { "type": "object", "additionalProperties": { "type": "string" } },
+        "volumes": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["image"]
+    },
+    "Step": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "displayName": { "type": "string" },
+        "task": { "type": "string" },
+        "script": { "type": "string" },
+        "bash": { "type": "string" },
+        "powershell": { "type": "string" },
+        "inputs": { "type": "object", "additionalProperties": true },
+        "env": { "type": "object", "additionalProperties": { "type": "string" } },
+        "condition": { "type": "string" },
+        "continueOnError": { "type": "boolean" },
+        "timeoutInMinutes": { "type": "integer" },
+        "retryCountOnTaskFailure": { "type": "integer" }
+      }
+    },
+    "Strategy": {
+      "type": "object",
+      "properties": {
+        "matrix": { "type": "object", "additionalProperties": { "type": "object" } },
+        "parallel": { "type": "integer" },
+        "maxParallel": { "type": "integer" }
+      }
+    },
+    "Trigger": {
+      "type": "object",
+      "properties": {
+        "branches": {
+          "type": "object",
+          "properties": {
+            "include": { "type": "array", "items": { "type": "string" } },
+            "exclude": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "paths": {
+          "type": "object",
+          "properties": {
+            "include": { "type": "array", "items": { "type": "string" } },
+            "exclude": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "tags": {
+          "type": "object",
+          "properties": {
+            "include": { "type": "array", "items": { "type": "string" } },
+            "exclude": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      }
+    },
+    "Resource": {
+      "type": "object",
+      "properties": {
+        "repositories": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "repository": { "type": "string" },
+              "type": { "type": "string", "enum": ["git", "github", "bitbucket"] },
+              "name": { "type": "string" },
+              "ref": { "type": "string" }
+            },
+            "required": ["repository", "type"]
+          }
+        },
+        "containers": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Container" }
+        }
+      }
+    }
+  },
+  "properties": {
+    "name": { "type": "string" },
+    "trigger": { "$ref": "#/definitions/Trigger" },
+    "pr": { "$ref": "#/definitions/Trigger" },
+    "schedules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "cron": { "type": "string" },
+          "displayName": { "type": "string" },
+          "branches": { "type": "object" },
+          "always": { "type": "boolean" }
+        },
+        "required": ["cron"]
+      }
+    },
+    "resources": { "$ref": "#/definitions/Resource" },
+    "variables": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "value": { "type": "string" },
+          "group": { "type": "string" },
+          "template": { "type": "string" }
+        }
+      }
+    },
+    "stages": { "type": "array", "items": { "$ref": "#/definitions/Stage" } },
+    "jobs": { "type": "array", "items": { "$ref": "#/definitions/Job" } }
+  }
+}

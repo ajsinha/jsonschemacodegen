@@ -1,0 +1,114 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "config.json",
+  "title": "ApplicationConfig",
+  "description": "Application configuration with nested settings",
+  "type": "object",
+  "definitions": {
+    "DatabaseConfig": {
+      "type": "object",
+      "properties": {
+        "host": { "type": "string", "default": "localhost" },
+        "port": { "type": "integer", "minimum": 1, "maximum": 65535, "default": 5432 },
+        "database": { "type": "string" },
+        "username": { "type": "string" },
+        "password": { "type": "string" },
+        "ssl": { "type": "boolean", "default": false },
+        "poolSize": { "type": "integer", "minimum": 1, "maximum": 100, "default": 10 },
+        "timeout": { "type": "integer", "minimum": 0, "default": 30000 }
+      },
+      "required": ["host", "database", "username"]
+    },
+    "CacheConfig": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean", "default": true },
+        "driver": { "type": "string", "enum": ["memory", "redis", "memcached"] },
+        "ttl": { "type": "integer", "minimum": 0, "default": 3600 },
+        "redis": {
+          "type": "object",
+          "properties": {
+            "host": { "type": "string" },
+            "port": { "type": "integer" },
+            "password": { "type": "string" },
+            "db": { "type": "integer", "minimum": 0, "maximum": 15 }
+          }
+        }
+      }
+    },
+    "LoggingConfig": {
+      "type": "object",
+      "properties": {
+        "level": { "type": "string", "enum": ["debug", "info", "warn", "error"], "default": "info" },
+        "format": { "type": "string", "enum": ["json", "text"], "default": "json" },
+        "outputs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "enum": ["console", "file", "syslog"] },
+              "path": { "type": "string" },
+              "maxSize": { "type": "string" },
+              "maxAge": { "type": "integer" }
+            },
+            "required": ["type"]
+          }
+        }
+      }
+    },
+    "SecurityConfig": {
+      "type": "object",
+      "properties": {
+        "jwtSecret": { "type": "string", "minLength": 32 },
+        "jwtExpiry": { "type": "integer", "default": 86400 },
+        "bcryptRounds": { "type": "integer", "minimum": 4, "maximum": 31, "default": 12 },
+        "cors": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "origins": { "type": "array", "items": { "type": "string" } },
+            "methods": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "rateLimit": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "windowMs": { "type": "integer" },
+            "maxRequests": { "type": "integer" }
+          }
+        }
+      }
+    }
+  },
+  "properties": {
+    "app": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "version": { "type": "string" },
+        "environment": { "type": "string", "enum": ["development", "staging", "production"] },
+        "debug": { "type": "boolean", "default": false },
+        "baseUrl": { "type": "string", "format": "uri" }
+      },
+      "required": ["name", "environment"]
+    },
+    "server": {
+      "type": "object",
+      "properties": {
+        "host": { "type": "string", "default": "0.0.0.0" },
+        "port": { "type": "integer", "default": 3000 },
+        "workers": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "database": { "$ref": "#/definitions/DatabaseConfig" },
+    "cache": { "$ref": "#/definitions/CacheConfig" },
+    "logging": { "$ref": "#/definitions/LoggingConfig" },
+    "security": { "$ref": "#/definitions/SecurityConfig" },
+    "features": {
+      "type": "object",
+      "additionalProperties": { "type": "boolean" }
+    }
+  },
+  "required": ["app", "database"]
+}
